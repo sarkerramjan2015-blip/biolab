@@ -189,7 +189,7 @@ export default function Landing() {
               <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
                 Biology প্রস্তুতি এখন আরও পরিষ্কার, দ্রুত, সুন্দর।
               </h1>
-              <div className="shine-text mx-auto mt-3 min-h-10 max-w-3xl bg-gradient-to-r from-teal-600 via-indigo-600 to-amber-500 bg-clip-text text-2xl font-extrabold text-transparent dark:from-teal-300 dark:via-indigo-300 dark:to-amber-300 sm:text-4xl">
+              <div className="shine-text mx-auto mt-3 min-h-10 max-w-3xl bg-gradient-to-r from-teal-600 to-indigo-600 bg-clip-text text-2xl font-extrabold text-transparent dark:from-teal-300 dark:to-indigo-300 sm:text-4xl">
                 {typedPhrase}
                 <span className="typing-caret ml-1 inline-block text-teal-600 dark:text-teal-300">|</span>
               </div>
