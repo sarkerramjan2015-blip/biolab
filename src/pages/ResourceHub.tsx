@@ -198,7 +198,7 @@ export default function ResourceHub() {
 
 function ChapterGrid({ chapters, colorTheme }: { chapters: ChapterDoc[]; colorTheme: ColorTheme }) {
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {chapters.map((chapter, index) => (
         <motion.div
           key={chapter.docId || `${chapter.subject}-${chapter.id}-${index}`}
@@ -253,29 +253,29 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
   };
 
   return (
-    <Card className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 ${themeStyles.card}`}>
-      <div className={`h-1.5 w-full bg-gradient-to-r ${themeStyles.gradient}`} />
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
+    <Card className={`group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 ${themeStyles.card}`}>
+      <div className={`h-1 w-full bg-gradient-to-r ${themeStyles.gradient}`} />
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className={`mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] ${themeStyles.text}`}>
+            <p className={`mb-1.5 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.18em] ${themeStyles.text}`}>
               <span className={`h-2 w-2 rounded-full bg-gradient-to-r ${themeStyles.gradient}`} />
               অধ্যায় {chapter.id}
             </p>
-            <h3 className="text-xl font-extrabold leading-snug tracking-normal text-slate-950 dark:text-white sm:text-2xl">
+            <h3 className="text-lg font-extrabold leading-snug tracking-normal text-slate-950 dark:text-white sm:text-xl">
               {chapter.title}
             </h3>
             <p className="mt-2 text-xs font-semibold text-slate-500">
               {subjectLabels[chapter.subject as SubjectKey] ?? chapter.subject}
             </p>
           </div>
-          <div className={`shrink-0 rounded-xl border px-3 py-2 text-center text-xs font-bold ${themeStyles.badge}`}>
-            <span className="block text-base leading-none">{availablePdfs}</span>
+          <div className={`shrink-0 rounded-lg border px-2.5 py-2 text-center text-[11px] font-bold ${themeStyles.badge}`}>
+            <span className="block text-sm leading-none">{availablePdfs}</span>
             PDF
           </div>
         </div>
 
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-2.5">
           {chapter.writers.map((writer, index) => {
             const title = writer.resourceTitle ?? writer.name;
             const hasPdf = Boolean(writer.pdfUrl);
@@ -283,9 +283,9 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
             return (
               <div
                 key={`${writer.pdfUrl ?? writer.name}-${index}`}
-                className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3.5 transition-colors hover:border-slate-200 hover:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:bg-slate-950"
+                className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition-colors hover:border-slate-200 hover:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:bg-slate-950"
               >
-                <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="mb-2.5 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h4 className="line-clamp-2 text-sm font-bold leading-6 text-slate-900 dark:text-slate-100">
                       {title}
@@ -312,7 +312,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="h-9 w-full rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <FileText className="mr-1.5 h-3.5 w-3.5" /> পড়ো
                       </Button>
@@ -321,7 +321,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-10 rounded-xl border border-dashed border-slate-300 bg-slate-100 text-xs font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800/70"
+                      className="h-9 rounded-lg border border-dashed border-slate-300 bg-slate-100 text-xs font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800/70"
                       disabled
                     >
                       Coming Soon
@@ -332,7 +332,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                     size="sm"
                     onClick={() => handleDownload(writer)}
                     disabled={!hasPdf}
-                    className="h-10 w-full rounded-xl border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:text-slate-950 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-white"
+                    className="h-9 w-full rounded-lg border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:text-slate-950 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-white"
                     aria-label={`Download ${title}`}
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
@@ -361,7 +361,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
           })}
         </div>
 
-        <div className="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
           <span className={`inline-flex items-center text-xs font-extrabold uppercase tracking-[0.16em] ${themeStyles.text}`}>
             Chapter Resources <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </span>

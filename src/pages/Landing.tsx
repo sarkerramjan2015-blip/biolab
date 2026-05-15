@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,9 +19,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/lib/auth';
 import Seo from '@/src/components/Seo';
 import mentorPhoto from '../img/pic.jpeg';
+import SiteFooter from '@/src/components/site/SiteFooter';
+
+const typingPhrases = ['আরও পরিষ্কার', 'আরও দ্রুত', 'আরও সুন্দর'];
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [typedPhrase, setTypedPhrase] = useState('');
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user, login, logout, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -37,6 +43,33 @@ export default function Landing() {
     { name: 'Mentor', path: '/mentors' },
     { name: 'Admin Portal', path: '/admin/dashboard' },
   ];
+
+  useEffect(() => {
+    const activePhrase = typingPhrases[phraseIndex];
+    const isComplete = typedPhrase === activePhrase;
+    const isEmpty = typedPhrase.length === 0;
+    const timeout = window.setTimeout(() => {
+      if (!isDeleting && !isComplete) {
+        setTypedPhrase(activePhrase.slice(0, typedPhrase.length + 1));
+        return;
+      }
+
+      if (!isDeleting && isComplete) {
+        setIsDeleting(true);
+        return;
+      }
+
+      if (isDeleting && !isEmpty) {
+        setTypedPhrase(activePhrase.slice(0, typedPhrase.length - 1));
+        return;
+      }
+
+      setIsDeleting(false);
+      setPhraseIndex((current) => (current + 1) % typingPhrases.length);
+    }, !isDeleting && isComplete ? 1300 : isDeleting ? 55 : 90);
+
+    return () => window.clearTimeout(timeout);
+  }, [isDeleting, phraseIndex, typedPhrase]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
@@ -148,7 +181,7 @@ export default function Landing() {
               transition={{ duration: 0.45 }}
               className="mx-auto max-w-5xl text-center"
             >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-teal-700 shadow-sm backdrop-blur dark:border-teal-900/60 dark:bg-slate-950/60 dark:text-teal-300">
+              <div className="shine-chip mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-teal-700 shadow-sm backdrop-blur dark:border-teal-900/60 dark:bg-slate-950/60 dark:text-teal-300">
                 <Sparkles className="h-4 w-4" />
                 PDF-first SSC & HSC Biology Platform
               </div>
@@ -156,6 +189,10 @@ export default function Landing() {
               <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
                 Biology প্রস্তুতি এখন আরও পরিষ্কার, দ্রুত, সুন্দর।
               </h1>
+              <div className="shine-text mx-auto mt-3 min-h-10 max-w-3xl bg-gradient-to-r from-teal-600 via-indigo-600 to-amber-500 bg-clip-text text-2xl font-extrabold text-transparent dark:from-teal-300 dark:via-indigo-300 dark:to-amber-300 sm:text-4xl">
+                {typedPhrase}
+                <span className="typing-caret ml-1 inline-block text-teal-600 dark:text-teal-300">|</span>
+              </div>
               <p className="mx-auto mt-6 max-w-3xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-xl sm:leading-9">
                 দাগানো PDF, solve sheet, mentor guidance আর chapter-wise archive এক জায়গায়। মোবাইল, ট্যাব আর
                 ডেস্কটপে একইভাবে পড়ার মতো করে BIO LAB সাজানো হয়েছে।
@@ -245,6 +282,7 @@ export default function Landing() {
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }

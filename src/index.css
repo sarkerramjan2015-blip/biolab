@@ -163,4 +163,63 @@
       linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
   }
+
+  .shine-chip {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-chip::after {
+    position: absolute;
+    top: -35%;
+    left: -45%;
+    width: 32%;
+    height: 170%;
+    content: "";
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+    transform: rotate(18deg);
+    animation: shine-sweep 3.8s ease-in-out infinite;
+  }
+
+  .shine-text {
+    background-size: 220% auto;
+    animation: shine-text 4.5s linear infinite;
+  }
+
+  .typing-caret {
+    animation: caret-blink 0.9s steps(1) infinite;
+  }
+
+  .developer-ribbon {
+    background: linear-gradient(90deg, #5eead4, #c7d2fe, #fde68a);
+    clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
+  }
+}
+
+@keyframes shine-sweep {
+  0%,
+  18% {
+    transform: translateX(0) rotate(18deg);
+  }
+
+  55%,
+  100% {
+    transform: translateX(450%) rotate(18deg);
+  }
+}
+
+@keyframes shine-text {
+  from {
+    background-position: 0% center;
+  }
+
+  to {
+    background-position: 220% center;
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
 }
