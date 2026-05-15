@@ -95,7 +95,7 @@ export default function AppLayout() {
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           ) : (
-            <Button onClick={async () => { await login(); navigate('/dashboard'); }} variant="ghost" className="w-full justify-start text-teal-400 hover:bg-teal-500/10 hover:text-teal-300">
+            <Button onClick={async () => { if (await login()) navigate('/dashboard'); }} variant="ghost" className="w-full justify-start text-teal-400 hover:bg-teal-500/10 hover:text-teal-300">
               <LogOut className="w-4 h-4 mr-2 rotate-180" /> Login
             </Button>
           )}
@@ -167,7 +167,7 @@ export default function AppLayout() {
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                   </Button>
                 ) : (
-                  <Button onClick={async () => { await login(); navigate('/dashboard'); setIsOpen(false); }} variant="ghost" className="w-full justify-start text-teal-400 hover:bg-teal-500/10 hover:text-teal-300">
+                  <Button onClick={async () => { if (await login()) { navigate('/dashboard'); setIsOpen(false); } }} variant="ghost" className="w-full justify-start text-teal-400 hover:bg-teal-500/10 hover:text-teal-300">
                     <LogOut className="w-4 h-4 mr-2 rotate-180" /> Login
                   </Button>
                 )}

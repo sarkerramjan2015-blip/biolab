@@ -26,8 +26,9 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    await login();
-    navigate('/dashboard');
+    if (await login()) {
+      navigate('/dashboard');
+    }
   };
 
   const navItems = [

@@ -113,7 +113,7 @@ export default function AdminLayout() {
               <LogOut className="w-4 h-4 mr-2" /> Logout
             </Button>
           ) : (
-            <Button onClick={async () => { await login(); navigate('/admin/dashboard'); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
+            <Button onClick={async () => { if (await login()) navigate('/admin/dashboard'); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
               <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
             </Button>
           )}
@@ -157,7 +157,7 @@ export default function AdminLayout() {
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                   </Button>
                 ) : (
-                  <Button onClick={async () => { await login(); navigate('/admin/dashboard'); setIsOpen(false); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
+                  <Button onClick={async () => { if (await login()) { navigate('/admin/dashboard'); setIsOpen(false); } }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
                     <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
                   </Button>
                 )}

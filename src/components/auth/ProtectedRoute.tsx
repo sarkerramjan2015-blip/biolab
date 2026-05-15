@@ -12,7 +12,7 @@ type ProtectedRouteProps = {
 };
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, loading, login } = useAuth();
+  const { user, loading, login, loginError } = useAuth();
   const localPreview = isLocalAdminPreviewEnabled();
 
   if (loading) {
@@ -52,6 +52,11 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
             >
               Continue with Google
             </Button>
+            {loginError && (
+              <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700 dark:bg-red-950/30 dark:text-red-300">
+                {loginError}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
