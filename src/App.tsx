@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import ResourceHub from './pages/ResourceHub';
@@ -29,7 +29,11 @@ export default function App() {
 
           {/* Admin Routes */}
           <Route element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/content" element={<Navigate to="/admin/dashboard#pdf-resources" replace />} />
+            <Route path="/admin/users" element={<Navigate to="/admin/dashboard#admin-help" replace />} />
+            <Route path="/admin/settings" element={<Navigate to="/admin/dashboard#admin-help" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

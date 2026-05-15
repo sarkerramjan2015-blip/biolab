@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Microscope, ArrowRight, PlayCircle, BookOpen, Layers, Users, Library, CheckCircle2, Menu, X, LogOut } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  FileText,
+  Layers,
+  Library,
+  LogOut,
+  Menu,
+  Microscope,
+  Sparkles,
+  Users,
+  X,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '@/lib/auth';
 import Seo from '@/src/components/Seo';
+import mentorPhoto from '../img/pic.jpeg';
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,104 +30,103 @@ export default function Landing() {
     navigate('/dashboard');
   };
 
-  const handleStart = () => {
-    navigate('/dashboard');
-  };
-
   const navItems = [
-    { name: 'Home', path: '#' },
-    { name: 'Resource Hub', path: '/resources' },
-    { name: 'Solve Classes', path: '/video' },
-    { name: 'Our Mentors', path: '/mentors' },
+    { name: 'Home', path: '/' },
+    { name: 'PDF Archive', path: '/resources' },
+    { name: 'Mentor', path: '/mentors' },
     { name: 'Admin Portal', path: '/admin/dashboard' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
       <Seo
         title="BIO LAB - SSC ও HSC Biology Preparation"
         description="BIO LAB এ SSC ও HSC biology chapter-wise PDF, solve class, mentor guidance, and smart study dashboard একসাথে পাওয়া যায়."
       />
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="bg-teal-500 p-2.5 rounded-xl text-white shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-              <Microscope className="w-6 h-6" />
+
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/88 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/88">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
+          <Link to="/" className="group flex items-center gap-3">
+            <div className="rounded-2xl bg-teal-600 p-2.5 text-white shadow-lg shadow-teal-600/20 transition-transform group-hover:scale-105">
+              <Microscope className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white uppercase leading-none">BIO LAB</span>
-              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 mt-1">জীববিজ্ঞান এ বিশুদ্ধ জ্ঞান</span>
+              <span className="text-xl font-extrabold leading-none tracking-normal text-slate-950 dark:text-white sm:text-2xl">
+                BIO LAB
+              </span>
+              <span className="mt-1 text-[10px] font-bold text-teal-700 dark:text-teal-300 sm:text-xs">
+                জীববিজ্ঞানে বিশুদ্ধ প্রস্তুতি
+              </span>
             </div>
           </Link>
-          
-          <nav className="hidden md:flex gap-8 text-sm font-bold text-slate-600 dark:text-slate-300">
-            {navItems.map(item => (
-              <Link key={item.name} to={item.path} className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+
+          <nav className="hidden items-center gap-7 text-sm font-bold text-slate-600 dark:text-slate-300 lg:flex">
+            {navItems.map((item) => (
+              <Link key={item.name} to={item.path} className="transition-colors hover:text-teal-700 dark:hover:text-teal-300">
                 {item.name}
               </Link>
             ))}
           </nav>
-          
-          <div className="flex items-center gap-2 md:gap-4">
+
+          <div className="flex items-center gap-2 sm:gap-3">
             {!loading && !user ? (
               <>
-                <Button 
+                <Button
                   onClick={handleLogin}
-                  variant="ghost" 
-                  className="hidden sm:inline-flex font-bold text-slate-600 dark:text-slate-300 hover:text-teal-600"
+                  variant="ghost"
+                  className="hidden font-bold text-slate-600 hover:text-teal-700 dark:text-slate-300 sm:inline-flex"
                 >
                   Log in
                 </Button>
-                <Button 
-                  onClick={handleStart}
-                  className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-4 md:px-6 font-bold shadow-lg shadow-teal-600/20 transition-all hover:-translate-y-0.5"
+                <Button
+                  onClick={() => navigate('/dashboard')}
+                  className="h-10 rounded-xl bg-teal-600 px-4 font-bold text-white shadow-lg shadow-teal-600/20 hover:bg-teal-700 sm:px-5"
                 >
-                  Get Started <ArrowRight className="w-4 h-4 ml-1 md:ml-2 hidden sm:inline" />
+                  Get Started <ArrowRight className="ml-2 hidden h-4 w-4 sm:inline" />
                 </Button>
               </>
             ) : user ? (
               <>
-                <div className="hidden sm:flex items-center gap-2 text-sm font-bold mr-4">
+                <div className="hidden max-w-44 items-center gap-2 text-sm font-bold sm:flex">
                   {user.photoURL && (
-                    <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border-2 border-teal-500" />
+                    <img src={user.photoURL} alt="Profile" className="h-8 w-8 rounded-full border-2 border-teal-500" />
                   )}
-                  <span className="text-slate-700 dark:text-slate-200">{user.displayName}</span>
+                  <span className="truncate text-slate-700 dark:text-slate-200">{user.displayName}</span>
                 </div>
-                <Button onClick={logout} variant="outline" size="icon" className="hidden sm:flex border-slate-200 dark:border-slate-800">
-                  <LogOut className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <Button onClick={logout} variant="outline" size="icon" className="hidden rounded-xl border-slate-200 dark:border-slate-800 sm:flex">
+                  <LogOut className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                 </Button>
                 <Link to="/dashboard">
-                  <Button className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-4 md:px-6 font-bold shadow-lg shadow-teal-600/20 transition-all hover:-translate-y-0.5">
-                    Dashboard <ArrowRight className="w-4 h-4 ml-1 md:ml-2 hidden sm:inline" />
+                  <Button className="h-10 rounded-xl bg-teal-600 px-4 font-bold text-white shadow-lg shadow-teal-600/20 hover:bg-teal-700 sm:px-5">
+                    Dashboard <ArrowRight className="ml-2 hidden h-4 w-4 sm:inline" />
                   </Button>
                 </Link>
               </>
             ) : null}
-            <button 
-              className="md:hidden p-2 text-slate-600 dark:text-slate-300"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            <button
+              className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900 lg:hidden"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              aria-label="Toggle menu"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden"
+              className="overflow-hidden border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:hidden"
             >
-              <div className="flex flex-col px-4 py-4 space-y-4">
-                {navItems.map(item => (
-                  <Link 
-                    key={item.name} 
-                    to={item.path} 
-                    className="font-bold text-slate-600 dark:text-slate-300 hover:text-teal-600 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900"
+              <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.path}
+                    className="rounded-xl px-3 py-3 font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-700 dark:text-slate-300 dark:hover:bg-slate-900"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
@@ -125,81 +138,108 @@ export default function Landing() {
         </AnimatePresence>
       </header>
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col">
-        <section className="relative overflow-hidden w-full">
-          {/* Background decorations */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-            <div className="absolute top-20 left-10 w-72 h-72 bg-teal-400/10 dark:bg-teal-500/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-400/10 dark:bg-indigo-500/5 rounded-full blur-3xl"></div>
-          </div>
-
-          <div className="container mx-auto px-4 py-24 md:py-32 flex flex-col items-center text-center relative z-10">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+      <main>
+        <section className="bio-surface bio-grid relative overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 pb-10 pt-14 sm:px-6 sm:pb-14 sm:pt-20 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-4xl flex flex-col items-center"
+              transition={{ duration: 0.45 }}
+              className="mx-auto max-w-5xl text-center"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 text-sm font-bold mb-6 border border-teal-100 dark:border-teal-800">
-                <span className="flex h-2 w-2 rounded-full bg-teal-500 animate-pulse"></span>
-                SSC & HSC 2025 ব্যাচের জন্য সেরা প্ল্যাটফর্ম
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-teal-700 shadow-sm backdrop-blur dark:border-teal-900/60 dark:bg-slate-950/60 dark:text-teal-300">
+                <Sparkles className="h-4 w-4" />
+                PDF-first SSC & HSC Biology Platform
               </div>
-              
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 text-slate-900 dark:text-white leading-[1.1] max-w-4xl">
-                বায়োলজি প্রস্তুতি এখন <br className="hidden md:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-indigo-500">
-                  আরও স্মার্ট, আরও সহজ।
-                </span>
+
+              <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
+                Biology প্রস্তুতি এখন আরও পরিষ্কার, দ্রুত, সুন্দর।
               </h1>
-              <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
-                BIO LAB-এ পাচ্ছ দাগানো বইয়ের স্মার্ট রিডার, সলভ শিট এবং আনলিমিটেড লাইভ এমসিকিউ এক্সাম। এক্সপার্ট মেন্টরদের সাথে তোমার প্রস্তুতি শুরু করো আজই।
+              <p className="mx-auto mt-6 max-w-3xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-xl sm:leading-9">
+                দাগানো PDF, solve sheet, mentor guidance আর chapter-wise archive এক জায়গায়। মোবাইল, ট্যাব আর
+                ডেস্কটপে একইভাবে পড়ার মতো করে BIO LAB সাজানো হয়েছে।
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+
+              <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:flex-row">
+                <Link to="/resources" className="w-full sm:w-auto">
+                  <Button size="lg" className="h-12 w-full rounded-xl bg-teal-600 px-7 text-base font-extrabold text-white shadow-xl shadow-teal-600/20 hover:bg-teal-700 sm:h-14">
+                    রিসোর্স দেখো <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
                 <Link to="/dashboard" className="w-full sm:w-auto">
-                  <Button size="lg" className="bg-teal-600 hover:bg-teal-700 text-white w-full h-14 px-8 text-lg font-bold rounded-xl shadow-xl shadow-teal-600/20 transition-all hover:-translate-y-1">
+                  <Button size="lg" variant="outline" className="h-12 w-full rounded-xl border-slate-300 bg-white/80 px-7 text-base font-extrabold text-slate-800 backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-slate-950/50 dark:text-white sm:h-14">
                     পড়া শুরু করো
                   </Button>
                 </Link>
-                <Link to="/resources" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full h-14 px-8 text-lg font-bold rounded-xl border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
-                    রিসোর্সগুলো দেখো
-                  </Button>
-                </Link>
               </div>
-              
-              <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm font-semibold text-slate-500">
-                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-500" /> স্মার্ট পিডিএফ রিডার</span>
-                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-500" /> এক্সপার্ট লেকচার</span>
-                <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-500" /> সলভ শিট</span>
+
+              <div className="mx-auto mt-9 grid max-w-3xl grid-cols-1 gap-3 text-left sm:grid-cols-3">
+                {[
+                  'Real PDF reader',
+                  'Chapter wise archive',
+                  'Mentor guided flow',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/75 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-200">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
+                    {item}
+                  </div>
+                ))}
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Features Preview */}
-        <section className="bg-white dark:bg-slate-900 py-16 md:py-24 flex-1 border-t border-slate-100 dark:border-slate-800">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">যেসব ফিচারে আমরা সেরা</h2>
-              <p className="text-slate-500 max-w-2xl mx-auto">তোমার সেরা প্রস্তুতির জন্য যা যা প্রয়োজন, সবকিছুই আছে একটি প্ল্যাটফর্মে।</p>
+        <section className="border-y border-slate-200 bg-white py-12 dark:border-slate-800 dark:bg-slate-900 sm:py-16">
+          <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+            <FeatureCard
+              icon={<Library className="h-7 w-7 text-teal-700" />}
+              title="সাজানো আর্কাইভ"
+              description="HSC Botany, Zoology আর SSC chapter অনুযায়ী PDF সাজানো, যাতে প্রয়োজনের ফাইল খুঁজে পেতে সময় নষ্ট না হয়।"
+            />
+            <FeatureCard
+              icon={<Layers className="h-7 w-7 text-indigo-700" />}
+              title="ফোকাসড রিডার"
+              description="ওয়েবসাইটের ভিতরেই PDF পড়া, নতুন tab-এ খোলা, এবং এক ক্লিকে download করার flow রাখা হয়েছে।"
+            />
+            <FeatureCard
+              icon={<FileText className="h-7 w-7 text-amber-700" />}
+              title="সহজ PDF download"
+              description="প্রতিটি PDF card-এ পড়ার এবং download করার আলাদা button আছে, তাই student দ্রুত নিজের প্রয়োজনের resource নিতে পারবে।"
+            />
+          </div>
+        </section>
+
+        <section className="bg-slate-50 py-12 dark:bg-slate-950 sm:py-16">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-center lg:px-8">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <img src={mentorPhoto} alt="BIO LAB mentor" className="h-72 w-full object-cover object-top sm:h-96 lg:h-[420px]" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <FeatureCard 
-                icon={<BookOpen className="w-8 h-8 text-teal-600" />}
-                title="স্মার্ট আর্কাইভ"
-                description="আবুল হাসান স্যার বা গাজী আজমল স্যারের বইয়ের অধ্যায়ভিত্তিক দাগানো পিডিএফ, সলভ শিট সব এক জায়গায়।"
-              />
-              <FeatureCard 
-                icon={<Layers className="w-8 h-8 text-teal-600" />}
-                title="ইন-বিল্ট পিডিএফ রিডার"
-                description="কোনো অ্যাপ ছাড়া ওয়েবসাইটের ভেতরেই জুম সাপোর্টেড ফাস্ট পিডিএফ রিডার দিয়ে বই পড়ো আরাম করে।"
-              />
-              <FeatureCard 
-                icon={<PlayCircle className="w-8 h-8 text-teal-600" />}
-                title="অ্যাড-ফ্রি সলভ ভিডিও"
-                description="পরীক্ষার আগের রাতে ইউটিউবে অ্যাড দেখে সময় নষ্ট না করে, আমাদের ডেডিকেটেড ভিডিও প্লেয়ারে ক্লাস করো।"
-              />
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-teal-700 dark:text-teal-300">
+                Mentor led Biology
+              </p>
+              <h2 className="mt-3 max-w-3xl text-3xl font-extrabold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl">
+                Jahid Sir-এর biology resources এখন structured digital library।
+              </h2>
+              <p className="mt-4 max-w-2xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
+                BIO LAB-এ তার SSC ও HSC Biology PDF resources chapter অনুযায়ী সাজানো হয়েছে, যেন student খুব
+                সহজে পড়তে ও download করতে পারে।
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {[
+                  { icon: <BookOpen className="h-5 w-5" />, text: '35 PDF resources' },
+                  { icon: <FileText className="h-5 w-5" />, text: 'HSC + SSC organized' },
+                  { icon: <Users className="h-5 w-5" />, text: 'Jahid Sir guidance' },
+                  { icon: <CheckCircle2 className="h-5 w-5" />, text: 'Mobile first layout' },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">
+                      {item.icon}
+                    </span>
+                    {item.text}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -208,18 +248,14 @@ export default function Landing() {
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="p-8 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center gap-5 hover:border-teal-500 dark:hover:border-teal-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-teal-200 hover:bg-white hover:shadow-xl hover:shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/50 dark:hover:border-teal-900 dark:hover:bg-slate-950 dark:hover:shadow-none">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         {icon}
       </div>
-      <div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-          {description}
-        </p>
-      </div>
+      <h3 className="text-xl font-extrabold tracking-normal text-slate-950 dark:text-white">{title}</h3>
+      <p className="mt-3 text-sm font-medium leading-7 text-slate-600 dark:text-slate-400">{description}</p>
     </div>
   );
 }

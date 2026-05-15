@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loader2, LockKeyhole, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { adminSetupHint, isAdminUser } from '@/lib/admin';
+import { adminSetupHint, isAdminUser, isLocalAdminPreviewEnabled } from '@/lib/admin';
 import { useAuth } from '@/lib/auth';
 
 type ProtectedRouteProps = {
@@ -13,6 +13,7 @@ type ProtectedRouteProps = {
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, login } = useAuth();
+  const localPreview = isLocalAdminPreviewEnabled();
 
   if (loading) {
     return (
@@ -23,6 +24,10 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
         </div>
       </div>
     );
+  }
+
+  if (requireAdmin && localPreview) {
+    return <>{children}</>;
   }
 
   if (!user) {
@@ -36,7 +41,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
             <div>
               <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Admin login required</h1>
               <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                The student website is public. Sign in only if you need to manage BIO LAB admin content.
+                {localPreview
+                  ? 'Local test mode is on. Sign in with Google to preview the admin dashboard.'
+                  : 'The student website is public. Sign in only if you need to manage BIO LAB admin content.'}
               </p>
             </div>
             <Button

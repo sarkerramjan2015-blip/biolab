@@ -13,5 +13,10 @@ service cloud.firestore {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
+
+    match /resourceControls/{resourceId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

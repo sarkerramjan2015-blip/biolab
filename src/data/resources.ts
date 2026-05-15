@@ -4,6 +4,11 @@ export type WriterContent = {
   solve: boolean;
   video: boolean;
   pdfUrl?: string;
+  storagePath?: string;
+  resourceTitle?: string;
+  resourceKind?: 'pdf' | 'solve' | 'exam' | 'note';
+  sourcePath?: string;
+  sizeLabel?: string;
 };
 
 export type Chapter = {

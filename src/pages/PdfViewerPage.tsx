@@ -1,4 +1,4 @@
-import { Maximize2, ZoomIn, ZoomOut, ArrowLeft, Bookmark, DownloadCloud } from 'lucide-react';
+import { ArrowLeft, DownloadCloud, FileText, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -11,7 +11,7 @@ type PdfRouteState = {
 
 export default function PdfViewerPage() {
   const { state } = useLocation();
-  const { pdfUrl, title = 'অধ্যায় ২: কোষ বিভাজন - আবুল হাসান স্যার' } = (state ?? {}) as PdfRouteState;
+  const { pdfUrl, title = 'BIO LAB PDF Reader' } = (state ?? {}) as PdfRouteState;
 
   const handleDownload = () => {
     if (!pdfUrl) {
@@ -29,87 +29,81 @@ export default function PdfViewerPage() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="h-[calc(100vh-2rem-64px)] md:h-[calc(100vh-4rem)] flex flex-col bg-slate-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 w-full relative"
+      className="flex h-[calc(100vh-6rem)] min-h-[620px] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:h-[calc(100vh-4rem)]"
     >
       <Seo
         title="PDF Reader"
         description="Read BIO LAB chapter-wise biology PDFs with a focused web reader and download support."
       />
-      {/* Top Toolbar */}
-      <div className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-4">
           <Link to="/resources">
-            <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 dark:hover:text-white">
-              <ArrowLeft className="w-5 h-5" />
+            <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-slate-500 hover:text-slate-900 dark:hover:text-white">
+              <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
-            <h2 className="font-bold text-slate-900 dark:text-white text-sm md:text-base line-clamp-1">{title}</h2>
-            <p className="text-xs text-slate-500 hidden md:block">উদ্ভিদবিজ্ঞান • ১২০ পৃষ্ঠা</p>
+          <div className="min-w-0">
+            <h1 className="line-clamp-1 text-sm font-extrabold text-slate-950 dark:text-white sm:text-base">
+              {title}
+            </h1>
+            <p className="mt-0.5 hidden text-xs font-semibold text-slate-500 sm:block">
+              BIO LAB resource viewer
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 md:gap-2">
-          <Button variant="ghost" size="icon" className="text-slate-500 hidden md:flex">
-            <ZoomOut className="w-5 h-5" />
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleDownload}
+            disabled={!pdfUrl}
+            className="h-10 rounded-xl bg-teal-600 px-3 text-xs font-bold text-white shadow-sm hover:bg-teal-700 disabled:opacity-50 sm:px-4"
+          >
+            <DownloadCloud className="mr-1.5 h-4 w-4" />
+            <span>Download</span>
           </Button>
-          <span className="text-sm font-medium w-12 text-center text-slate-600 hidden md:block">100%</span>
-          <Button variant="ghost" size="icon" className="text-slate-500 hidden md:flex">
-            <ZoomIn className="w-5 h-5" />
-          </Button>
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-2 hidden md:block"></div>
-          
-          <Button variant="default" size="sm" onClick={handleDownload} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center font-bold px-4 md:mx-2 shadow-sm transition-all active:scale-95">
-            <DownloadCloud className="w-4 h-4 mr-2" /> <span className="hidden sm:inline">ডাউনলোড PDF</span>
-          </Button>
-          
-          <Button variant="ghost" size="icon" className="text-slate-500 hidden md:flex">
-            <Bookmark className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-slate-500">
-            <Maximize2 className="w-5 h-5" />
-          </Button>
+          {pdfUrl && (
+            <a href={pdfUrl} target="_blank" rel="noreferrer">
+              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700">
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            </a>
+          )}
         </div>
       </div>
 
-      {/* PDF Viewport */}
-      <div className="flex-1 overflow-auto bg-slate-200 dark:bg-slate-950 p-4 md:p-8 flex justify-center">
+      <div className="bio-surface flex-1 overflow-auto p-3 sm:p-5">
         {pdfUrl ? (
           <iframe
             title={title}
             src={pdfUrl}
-            className="h-full min-h-[720px] w-full max-w-5xl rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800"
+            className="mx-auto h-full min-h-[560px] w-full max-w-6xl rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800"
           />
         ) : (
-        <div className="w-full max-w-[800px] h-[1200px] bg-white dark:bg-slate-900 shadow-xl rounded-xl p-12 flex flex-col relative border border-slate-200 dark:border-slate-800">
-          
-          <div className="absolute top-8 right-8 bg-teal-100 text-teal-800 text-xs font-bold px-3 py-1 rounded w-fit uppercase">
-            দাগানো
+          <div className="grid h-full min-h-[520px] place-items-center">
+            <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">
+                <FileText className="h-7 w-7" />
+              </div>
+              <h2 className="mt-5 text-2xl font-extrabold text-slate-950 dark:text-white">
+                Resource বেছে নাও
+              </h2>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-500 dark:text-slate-400">
+                PDF reader সরাসরি Resource Hub থেকে খোলা হলে selected file এখানে দেখা যাবে।
+              </p>
+              <Link to="/resources" className="mt-6 inline-block">
+                <Button className="rounded-xl bg-teal-600 px-6 font-bold text-white hover:bg-teal-700">
+                  Resource Hub
+                </Button>
+              </Link>
+            </div>
           </div>
-          
-          <h1 className="text-3xl font-bold text-center mt-12 mb-8 font-serif text-slate-900 dark:text-slate-100">অধ্যায় ২: কোষ বিভাজন</h1>
-          
-          <div className="space-y-6 text-slate-800 dark:text-slate-300 font-serif leading-relaxed text-lg">
-             <p>কোষ বিভাজন একটি মৌলিক ও অত্যাবশ্যকীয় প্রক্রিয়া যার মাধ্যমে জীবের দৈহিক বৃদ্ধি ঘটে এবং বংশবৃদ্ধি হয়। যে প্রক্রিয়ায় একটি মাতৃকোষ বিভাজিত হয়ে দুটি বা চারটি অপত্য কোষ সৃষ্টি করে তাকে কোষ বিভাজন বলে।</p>
-             <p className="bg-yellow-100 dark:bg-yellow-900/30 p-1 rounded">ওয়াল্টার ফ্লেমিং (১৮৮২) প্রথম সামুদ্রিক স্যালামান্ডার (Triton) এর কোষে কোষ বিভাজন লক্ষ্য করেন।</p>
-             <p>কোষ বিভাজন প্রধানত তিন প্রকার: <br/>১. অ্যামাইটোসিস <br/>২. মাইটোসিস <br/>৩. মিয়োসিস</p>
-             <h3 className="text-xl font-bold mt-8 mb-4">মাইটোসিস (Mitosis)</h3>
-             <p className="bg-yellow-100 dark:bg-yellow-900/30 p-1 rounded inline">মাইটোসিস বিভাজনকে সমীকরণিক বিভাজন (Equational division) বলা হয়</p> 
-             <span> কারণ এই বিভাজনে মাতৃকোষের প্রতিটি ক্রোমোজোম লম্বালম্বিভাবে দু'ভাগে বিভক্ত হয়। ফলে সৃষ্ট নতুন কোষ দুটির ক্রোমোজোম সংখ্যা মাতৃকোষের ক্রোমোজোম সংখ্যার সমান থাকে।</span>
-          </div>
-        </div>
         )}
-      </div>
-
-      {/* Bottom Nav Mock for pages */}
-      <div className="h-14 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center gap-4 shrink-0">
-         <Button variant="outline" size="sm" className="rounded-full">পূর্ববর্তী</Button>
-         <span className="text-sm font-medium">পৃষ্ঠা ১ / ১২০</span>
-         <Button variant="outline" size="sm" className="rounded-full">পরবর্তী</Button>
       </div>
     </motion.div>
   );

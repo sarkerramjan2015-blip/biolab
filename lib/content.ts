@@ -5,6 +5,16 @@ import { Chapter, botanyChapters, zoologyChapters, sscBiologyChapters } from '@/
 import { isAdminUser } from './admin';
 
 export type ChapterDoc = Chapter & { subject: string; docId?: string; createdAt?: number };
+export type ResourceControl = {
+  pdfUrl: string;
+  hidden: boolean;
+  updatedAt: number;
+  updatedBy?: string | null;
+};
+
+function resourceControlId(pdfUrl: string) {
+  return encodeURIComponent(pdfUrl).replace(/\./g, '%2E');
+}
 
 export function useChapters() {
   const [chapters, setChapters] = useState<ChapterDoc[]>([]);
@@ -69,4 +79,39 @@ export function useChapters() {
   };
 
   return { chapters, loading, addChapter, updateChapter, deleteChapter };
+}
+
+export function useResourceControls() {
+  const [controls, setControls] = useState<ResourceControl[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'resourceControls'), (snapshot) => {
+      setControls(snapshot.docs.map((item) => item.data() as ResourceControl));
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching resource controls:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const hiddenUrls = new Set(
+    controls
+      .filter((control) => control.hidden)
+      .map((control) => control.pdfUrl),
+  );
+
+  const setResourceHidden = async (pdfUrl: string, hidden: boolean) => {
+    const ref = doc(db, 'resourceControls', resourceControlId(pdfUrl));
+    await setDoc(ref, {
+      pdfUrl,
+      hidden,
+      updatedAt: Date.now(),
+      updatedBy: auth.currentUser?.email ?? null,
+    } satisfies ResourceControl);
+  };
+
+  return { controls, hiddenUrls, loading, setResourceHidden };
 }

@@ -1,8 +1,9 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, FolderEdit, Settings, LogOut, ShieldCheck, Menu } from 'lucide-react';
+import { CircleHelp, FileText, LayoutDashboard, LogOut, Menu, ShieldCheck, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
+import { isLocalAdminPreviewEnabled } from '@/lib/admin';
 import { useAuth } from '@/lib/auth';
 
 export default function AdminLayout() {
@@ -10,6 +11,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { user, login, logout } = useAuth();
+  const localPreview = isLocalAdminPreviewEnabled();
 
   const handleLogout = async () => {
     await logout();
@@ -18,28 +20,40 @@ export default function AdminLayout() {
 
   const navItems = [
     { name: 'Overview', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: 'Manage Content', path: '/admin/content', icon: <FolderEdit className="w-5 h-5" /> },
-    { name: 'Users & Mentors', path: '/admin/users', icon: <Users className="w-5 h-5" /> },
-    { name: 'Settings', path: '/admin/settings', icon: <Settings className="w-5 h-5" /> },
+    { name: 'PDF List', path: '/admin/dashboard#pdf-resources', icon: <FileText className="w-5 h-5" /> },
+    { name: 'Upload PDF', path: '/admin/dashboard#upload-pdf', icon: <UploadCloud className="w-5 h-5" /> },
+    { name: 'Help', path: '/admin/dashboard#admin-help', icon: <CircleHelp className="w-5 h-5" /> },
   ];
 
   const NavLinks = () => (
     <div className="flex flex-col gap-2">
-      {navItems.map((item) => (
-        <Link
-          key={item.path}
-          to={item.path}
-          onClick={() => setIsOpen(false)}
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-            location.pathname === item.path
-              ? 'bg-orange-500/10 text-orange-500 font-bold'
-              : 'text-slate-400 hover:text-orange-500 hover:bg-slate-800/50'
-          }`}
-        >
-          {item.icon}
-          {item.name}
-        </Link>
-      ))}
+      {navItems.map((item) => {
+        const currentPath = `${location.pathname}${location.hash}`;
+        const isActive = item.path.includes('#')
+          ? currentPath === item.path
+          : location.pathname === item.path && !location.hash;
+
+        return (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={() => {
+              setIsOpen(false);
+              if (item.path.endsWith('#upload-pdf')) {
+                window.setTimeout(() => window.dispatchEvent(new Event('bio-admin-open-upload')), 0);
+              }
+            }}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${
+              isActive
+                ? 'bg-orange-500/10 font-bold text-orange-500'
+                : 'text-slate-400 hover:bg-slate-800/50 hover:text-orange-500'
+            }`}
+          >
+            {item.icon}
+            {item.name}
+          </Link>
+        );
+      })}
     </div>
   );
 
@@ -83,8 +97,8 @@ export default function AdminLayout() {
                    A
                  </div>
                  <div className="flex flex-col">
-                   <span className="text-sm font-semibold text-white">Admin</span>
-                   <span className="text-xs text-slate-400">Not logged in</span>
+                   <span className="text-sm font-semibold text-white">{localPreview ? 'Local Admin' : 'Admin'}</span>
+                   <span className="text-xs text-slate-400">{localPreview ? 'Preview access' : 'Not logged in'}</span>
                  </div>
                </div>
             </div>
@@ -100,7 +114,7 @@ export default function AdminLayout() {
             </Button>
           ) : (
             <Button onClick={async () => { await login(); navigate('/admin/dashboard'); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
-              <LogOut className="w-4 h-4 mr-2 rotate-180" /> Login
+              <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
             </Button>
           )}
         </div>
@@ -133,13 +147,18 @@ export default function AdminLayout() {
                 <NavLinks />
               </div>
               <div className="p-4 border-t border-slate-800">
+                <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" className="mb-2 w-full justify-start text-slate-400 hover:bg-slate-800/50 hover:text-white">
+                    Back to Student App
+                  </Button>
+                </Link>
                 {user ? (
                   <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-red-400 hover:bg-red-500/10 hover:text-red-300">
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                   </Button>
                 ) : (
                   <Button onClick={async () => { await login(); navigate('/admin/dashboard'); setIsOpen(false); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
-                    <LogOut className="w-4 h-4 mr-2 rotate-180" /> Login
+                    <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
                   </Button>
                 )}
               </div>

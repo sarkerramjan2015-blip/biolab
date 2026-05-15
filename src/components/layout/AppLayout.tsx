@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Library, PlaySquare, FileText, Menu, Microscope, LogOut, Users, ShieldAlert } from 'lucide-react';
+import { Home, Library, PlaySquare, FileText, Menu, Microscope, LogOut, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
@@ -18,10 +18,10 @@ export default function AppLayout() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
-    { name: 'Resource Hub', path: '/resources', icon: <Library className="w-5 h-5" /> },
-    { name: 'Solve Classes', path: '/video', icon: <PlaySquare className="w-5 h-5" /> },
+    { name: 'PDF Archive', path: '/resources', icon: <Library className="w-5 h-5" /> },
     { name: 'PDF Reader', path: '/reader', icon: <FileText className="w-5 h-5" /> },
     { name: 'Mentor', path: '/mentors', icon: <Users className="w-5 h-5" /> },
+    { name: 'Solve', path: '/video', icon: <PlaySquare className="w-5 h-5" /> },
   ];
 
   const NavLinks = () => (
@@ -45,7 +45,7 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex text-slate-900 font-sans pb-16 md:pb-0">
+    <div className="bio-surface min-h-screen flex pb-20 font-sans text-slate-900 dark:text-slate-50 md:pb-0">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-72 bg-[#0f172a] border-r border-[#0f172a] fixed h-full z-20">
         <div className="p-6 flex flex-col gap-2 border-b border-slate-800">
@@ -105,7 +105,7 @@ export default function AppLayout() {
       {/* Main Content Area */}
       <div className="flex-1 md:ml-72 flex flex-col">
         {/* Mobile Header */}
-        <header className="md:hidden bg-white/80 backdrop-blur-md dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between px-4 sticky top-0 z-30">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/88 px-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/88 md:hidden">
           <Link to="/" className="flex flex-col">
             <div className="flex items-center gap-2">
               <div className="bg-teal-500 p-1 rounded-lg text-white shadow-sm">
@@ -177,25 +177,25 @@ export default function AppLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 xl:p-8">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-40 pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-around h-16 px-1">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
+        <div className="flex h-16 items-center justify-around px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${
+                className={`flex h-full flex-1 flex-col items-center justify-center space-y-1 transition-colors ${
                   isActive ? 'text-teal-600 dark:text-teal-400' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
-                <div className={`p-1 rounded-full ${isActive ? 'bg-teal-50 dark:bg-teal-900/30' : ''}`}>
+                <div className={`rounded-full p-1.5 ${isActive ? 'bg-teal-50 dark:bg-teal-900/30' : ''}`}>
                   {item.icon}
                 </div>
                 <span className="text-[9px] font-bold tracking-tight text-center truncate w-full px-1">{item.name.split(' ')[0]}</span>
