@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Library, PlaySquare, FileText, Menu, Microscope, LogOut, Users } from 'lucide-react';
+import { FileText, FlaskConical, GraduationCap, Home, Library, LogOut, Menu, Microscope, PlaySquare, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
+import PageNavActions from '@/src/components/navigation/PageNavActions';
 
 export default function AppLayout() {
   const location = useLocation();
@@ -20,9 +21,14 @@ export default function AppLayout() {
     { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
     { name: 'স্পেশাল PDF কালেকশন', path: '/resources', icon: <Library className="w-5 h-5" /> },
     { name: 'PDF Reader', path: '/reader', icon: <FileText className="w-5 h-5" /> },
+    { name: 'Exam', path: '/exam', icon: <GraduationCap className="w-5 h-5" /> },
+    { name: 'Practical', path: '/practical', icon: <FlaskConical className="w-5 h-5" /> },
     { name: 'Mentor', path: '/mentors', icon: <Users className="w-5 h-5" /> },
     { name: 'Solve', path: '/video', icon: <PlaySquare className="w-5 h-5" /> },
   ];
+  const bottomNavItems = navItems.filter((item) => (
+    ['/dashboard', '/resources', '/exam', '/practical', '/mentors'].includes(item.path)
+  ));
 
   const NavLinks = () => (
     <div className="flex flex-col gap-2">
@@ -178,6 +184,7 @@ export default function AppLayout() {
 
         {/* Page Content */}
         <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 xl:p-8">
+          <PageNavActions className="mb-4" />
           <Outlet />
         </main>
       </div>
@@ -185,7 +192,7 @@ export default function AppLayout() {
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
         <div className="flex h-16 items-center justify-around px-1">
-          {navItems.map((item) => {
+          {bottomNavItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link

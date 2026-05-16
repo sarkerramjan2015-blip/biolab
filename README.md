@@ -1,6 +1,6 @@
 # BIO LAB
 
-BIO LAB is a React + Vite biology learning platform for SSC/HSC students. It includes a landing page, protected student dashboard, resource hub, PDF reader, solve class page, mentor profile, and admin content dashboard.
+BIO LAB is a React + Vite biology learning platform for SSC/HSC students. It includes a landing page, student dashboard, resource hub, PDF reader, solve class page, mentor profile, practical library, timed MCQ exams, and admin content tools.
 
 ## Local Setup
 
@@ -29,9 +29,10 @@ npm run build
 
 ## Firebase Security Notes
 
-- Student pages require Google login in the client.
+- Timed exam starts require Google login in the client; the rest of the student site stays public.
 - Admin pages require the email to be listed in `VITE_ADMIN_EMAILS`.
 - Firestore and Storage writes are locked to Firebase custom claim `admin == true`.
+- Exam attempts are owner-readable, while MCQ/practical writes stay admin-only.
 - Before production, set custom claims for the real admin account and deploy both `firestore.rules` and `storage.rules`.
 
 ## Production SEO Checklist

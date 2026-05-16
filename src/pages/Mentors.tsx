@@ -16,12 +16,10 @@ const highlights = [
 export default function Mentors() {
   const mentor = {
     name: 'জাহিদুল হাসান',
-    role: 'সহকারী শিক্ষক',
     degree: 'BSc, MSc in Botany',
     subject: 'SSC ও HSC Biology',
-    workplace: 'সামসুল হক খান স্কুল অ্যান্ড কলেজ',
     experience: 'জীববিজ্ঞান পাঠদানে প্রায় ১৫ বছরের অভিজ্ঞতা',
-    bio: 'জাহিদুল হাসান Botany-তে BSc ও MSc সম্পন্ন করেছেন এবং সামসুল হক খান স্কুল অ্যান্ড কলেজে সহকারী শিক্ষক হিসেবে কর্মরত। প্রায় ১৫ বছরের শিক্ষাদানের অভিজ্ঞতা থেকে তিনি SSC ও HSC শিক্ষার্থীদের জন্য জীববিজ্ঞানের জটিল বিষয়গুলো সহজ, পরীক্ষাভিত্তিক, এবং ধারাবাহিকভাবে বুঝতে সহায়তা করেন। BIO LAB-এ তার বাছাই করা resource chapter অনুযায়ী সাজানো, যাতে শিক্ষার্থীরা দ্রুত প্রয়োজনীয় PDF খুঁজে পায়, পড়তে পারে, এবং নিয়মিত revision চালিয়ে যেতে পারে।',
+    bio: 'জাহিদুল হাসান Botany-তে BSc ও MSc সম্পন্ন করেছেন। প্রায় ১৫ বছরের শিক্ষাদানের অভিজ্ঞতা থেকে তিনি SSC ও HSC শিক্ষার্থীদের জন্য জীববিজ্ঞানের জটিল বিষয়গুলো সহজ, পরীক্ষাভিত্তিক, এবং ধারাবাহিকভাবে বুঝতে সহায়তা করেন। BIO LAB-এ তার বাছাই করা resource chapter অনুযায়ী সাজানো, যাতে শিক্ষার্থীরা দ্রুত প্রয়োজনীয় PDF খুঁজে পায়, পড়তে পারে, এবং নিয়মিত revision চালিয়ে যেতে পারে।',
   };
 
   return (
@@ -53,9 +51,6 @@ export default function Mentors() {
             <h1 className="mt-3 text-4xl font-extrabold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-6xl">
               {mentor.name}
             </h1>
-            <p className="mt-3 text-xl font-bold text-slate-700 dark:text-slate-200">
-              {mentor.role}, {mentor.workplace}
-            </p>
             <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1.5 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300">
                 <GraduationCap className="h-4 w-4" /> {mentor.degree}

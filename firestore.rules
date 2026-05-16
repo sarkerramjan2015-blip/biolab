@@ -9,6 +9,24 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.admin == true;
     }
 
+    function expectedChapterLockId(userId, level, subject, chapterName, dayKey) {
+      return userId + '__' + level + '__' + subject + '__' + chapterName + '__' + dayKey;
+    }
+
+    function hasValidChapterAttemptLock(attemptId) {
+      return request.resource.data.lockId is string
+        && request.resource.data.lockId == expectedChapterLockId(
+          request.auth.uid,
+          request.resource.data.level,
+          request.resource.data.subject,
+          request.resource.data.chapterName,
+          request.resource.data.dayKey
+        )
+        && getAfter(
+          /databases/$(database)/documents/examAttemptLocks/$(request.resource.data.lockId)
+        ).data.attemptId == attemptId;
+    }
+
     match /chapters/{chapterId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
@@ -17,6 +35,80 @@ service cloud.firestore {
     match /resourceControls/{resourceId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    match /practicals/{practicalId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /mcqQuestions/{questionId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /examAttempts/{attemptId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && (
+          request.resource.data.testType == 'full_book'
+          || (
+            request.resource.data.testType == 'chapter_wise'
+            && hasValidChapterAttemptLock(attemptId)
+          )
+        );
+      allow update: if isAdmin() || (
+        isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'running'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status in ['running', 'submitted']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'selectedAnswers',
+          'correctCount',
+          'wrongCount',
+          'score',
+          'percentage',
+          'wrongPercentage',
+          'timeTakenSeconds',
+          'submittedAt',
+          'status'
+        ])
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /examAttemptLocks/{lockId} {
+      allow read: if isAdmin() || (
+        isSignedIn()
+        && lockId.matches(request.auth.uid + '__.*')
+      );
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.dayKey is string
+        && request.resource.data.attemptId is string
+        && lockId == expectedChapterLockId(
+          request.resource.data.userId,
+          request.resource.data.level,
+          request.resource.data.subject,
+          request.resource.data.chapterName,
+          request.resource.data.dayKey
+        );
+      allow update, delete: if isAdmin();
+    }
+
+    match /examAnswers/{answerId} {
+      allow read: if isAdmin() || (
+        isSignedIn()
+        && get(/databases/$(database)/documents/examAttempts/$(resource.data.attemptId)).data.userId == request.auth.uid
+      );
+      allow create: if isSignedIn()
+        && get(/databases/$(database)/documents/examAttempts/$(request.resource.data.attemptId)).data.userId == request.auth.uid
+        && get(/databases/$(database)/documents/examAttempts/$(request.resource.data.attemptId)).data.status == 'submitted'
+        && request.resource.data.questionId in get(/databases/$(database)/documents/examAttempts/$(request.resource.data.attemptId)).data.questionIds
+        && answerId == request.resource.data.attemptId + '_' + request.resource.data.questionId;
+      allow update, delete: if isAdmin();
     }
   }
 }

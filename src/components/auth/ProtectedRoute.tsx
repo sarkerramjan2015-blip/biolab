@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, LockKeyhole, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,15 @@ type ProtectedRouteProps = {
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, login, loginError } = useAuth();
   const localPreview = isLocalAdminPreviewEnabled();
+  const navigate = useNavigate();
+
+  const handleAdminLogin = async () => {
+    const signedIn = await login();
+
+    if (!signedIn) {
+      navigate('/');
+    }
+  };
 
   if (loading) {
     return (
@@ -47,11 +56,16 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
               </p>
             </div>
             <Button
-              onClick={login}
+              onClick={() => void handleAdminLogin()}
               className="h-11 w-full rounded-xl bg-teal-600 font-bold text-white hover:bg-teal-700"
             >
               Continue with Google
             </Button>
+            <Link to="/">
+              <Button variant="outline" className="h-11 w-full rounded-xl font-bold">
+                Back to Home
+              </Button>
+            </Link>
             {loginError && (
               <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700 dark:bg-red-950/30 dark:text-red-300">
                 {loginError}

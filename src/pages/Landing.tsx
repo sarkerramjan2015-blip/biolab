@@ -59,6 +59,8 @@ export default function Landing() {
 
   const navItems = [
     { name: 'Home', path: '/' },
+    { name: 'Exam', path: '/exam' },
+    { name: 'Practical', path: '/practical' },
     { name: 'স্পেশাল PDF কালেকশন', path: '/resources' },
     { name: 'Mentor', path: '/mentors' },
     { name: 'Admin Portal', path: '/admin/dashboard' },
@@ -296,7 +298,7 @@ export default function Landing() {
                 জাহিদুল হাসানের অভিজ্ঞতায় গড়া structured Biology learning library।
               </h2>
               <p className="mt-4 max-w-2xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
-                Botany-তে BSc ও MSc সম্পন্ন, সামসুল হক খান স্কুল অ্যান্ড কলেজের সহকারী শিক্ষক জাহিদুল হাসান
+                Botany-তে BSc ও MSc সম্পন্ন জাহিদুল হাসান
                 প্রায় ১৫ বছর ধরে জীববিজ্ঞান পড়াচ্ছেন। তার বাছাই করা SSC ও HSC resource BIO LAB-এ chapter অনুযায়ী
                 সাজানো হয়েছে, যেন student সহজে পড়তে, revise করতে, এবং download করতে পারে।
               </p>
@@ -304,7 +306,6 @@ export default function Landing() {
                 {[
                   { icon: <GraduationCap className="h-5 w-5" />, text: 'BSc, MSc in Botany' },
                   { icon: <Award className="h-5 w-5" />, text: 'প্রায় ১৫ বছরের অভিজ্ঞতা' },
-                  { icon: <Users className="h-5 w-5" />, text: 'সহকারী শিক্ষক' },
                   { icon: <CheckCircle2 className="h-5 w-5" />, text: 'SSC + HSC focused' },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">

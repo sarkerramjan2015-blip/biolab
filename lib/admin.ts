@@ -1,6 +1,8 @@
 import type { User } from 'firebase/auth';
 
-export const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS ?? '')
+const defaultAdminEmails = 'biolabjahid@gmail.com';
+
+export const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS ?? defaultAdminEmails)
   .split(',')
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean);

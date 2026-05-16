@@ -1,10 +1,11 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { CircleHelp, FileText, LayoutDashboard, LogOut, Menu, ShieldCheck, UploadCloud } from 'lucide-react';
+import { BarChart3, CircleHelp, ClipboardList, FileText, FlaskConical, LayoutDashboard, LogOut, Menu, ShieldCheck, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { isLocalAdminPreviewEnabled } from '@/lib/admin';
 import { useAuth } from '@/lib/auth';
+import PageNavActions from '@/src/components/navigation/PageNavActions';
 
 export default function AdminLayout() {
   const location = useLocation();
@@ -22,6 +23,9 @@ export default function AdminLayout() {
     { name: 'Overview', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { name: 'PDF List', path: '/admin/dashboard#pdf-resources', icon: <FileText className="w-5 h-5" /> },
     { name: 'Upload PDF', path: '/admin/dashboard#upload-pdf', icon: <UploadCloud className="w-5 h-5" /> },
+    { name: 'MCQ Bank', path: '/admin/mcq', icon: <ClipboardList className="w-5 h-5" /> },
+    { name: 'Practical', path: '/admin/practical', icon: <FlaskConical className="w-5 h-5" /> },
+    { name: 'Exam Report', path: '/admin/exam-report', icon: <BarChart3 className="w-5 h-5" /> },
     { name: 'Help', path: '/admin/dashboard#admin-help', icon: <CircleHelp className="w-5 h-5" /> },
   ];
 
@@ -167,6 +171,7 @@ export default function AdminLayout() {
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+          <PageNavActions className="mb-4" />
           <Outlet />
         </main>
       </div>
