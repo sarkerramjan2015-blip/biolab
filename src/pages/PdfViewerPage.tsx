@@ -7,6 +7,8 @@ import {
   FileText,
   Loader2,
   Maximize2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,8 +31,11 @@ type PdfFlipbookProps = {
 };
 
 export default function PdfViewerPage() {
-  const { state } = useLocation();
-  const { pdfUrl, title = 'BIO LAB PDF Reader' } = (state ?? {}) as PdfRouteState;
+  const location = useLocation();
+  const routeState = (location.state ?? {}) as PdfRouteState;
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const pdfUrl = routeState.pdfUrl ?? searchParams.get('pdf') ?? undefined;
+  const title = routeState.title ?? searchParams.get('title') ?? 'BIO LAB PDF Reader';
 
   const handleDownload = () => {
     if (!pdfUrl) {
@@ -109,11 +114,11 @@ export default function PdfViewerPage() {
                 Resource বেছে নাও
               </h2>
               <p className="mt-3 text-sm font-medium leading-7 text-slate-500 dark:text-slate-400">
-                Resource Hub থেকে কোনো PDF খুললে flipbook reader এখানে দেখা যাবে।
+                স্পেশাল PDF কালেকশন থেকে কোনো PDF খুললে flipbook reader এখানে দেখা যাবে।
               </p>
               <Link to="/resources" className="mt-6 inline-block">
                 <Button className="rounded-xl bg-teal-600 px-6 font-bold text-white hover:bg-teal-700">
-                  Resource Hub
+                  স্পেশাল PDF কালেকশন
                 </Button>
               </Link>
             </div>
@@ -130,6 +135,7 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [isSpread, setIsSpread] = useState(() => window.matchMedia('(min-width: 900px)').matches);
+  const [zoom, setZoom] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
   const absolutePdfUrl = useMemo(() => new URL(pdfUrl, window.location.origin).href, [pdfUrl]);
@@ -148,10 +154,12 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
   useEffect(() => {
     let cancelled = false;
     const loadingTask = getDocument(absolutePdfUrl);
+    let fallbackTask: ReturnType<typeof getDocument> | null = null;
 
     setPdfDocument(null);
     setPageCount(0);
     setCurrentPage(1);
+    setZoom(1);
     setError(null);
 
     loadingTask.promise
@@ -164,16 +172,46 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
         setPdfDocument(documentProxy);
         setPageCount(documentProxy.numPages);
       })
-      .catch((loadError: unknown) => {
-        if (!cancelled) {
-          console.error('Failed to load PDF', loadError);
-          setError('PDF load করা যায়নি। আবার চেষ্টা করো।');
+      .catch(async (loadError: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        try {
+          const response = await fetch(absolutePdfUrl);
+
+          if (!response.ok) {
+            throw new Error(`PDF request failed with ${response.status}`);
+          }
+
+          const pdfBytes = new Uint8Array(await response.arrayBuffer());
+
+          if (cancelled) {
+            return;
+          }
+
+          fallbackTask = getDocument({ data: pdfBytes });
+          const documentProxy = await fallbackTask.promise;
+
+          if (cancelled) {
+            documentProxy.destroy();
+            return;
+          }
+
+          setPdfDocument(documentProxy);
+          setPageCount(documentProxy.numPages);
+        } catch (retryError: unknown) {
+          if (!cancelled) {
+            console.error('Failed to load PDF', { loadError, retryError });
+            setError('PDF load করা যায়নি। আবার চেষ্টা করো।');
+          }
         }
       });
 
     return () => {
       cancelled = true;
       loadingTask.destroy();
+      fallbackTask?.destroy();
     };
   }, [absolutePdfUrl]);
 
@@ -201,6 +239,9 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
 
   const goPrevious = () => goToPage(currentPage - step);
   const goNext = () => goToPage(currentPage + step);
+  const zoomOut = () => setZoom((value) => Math.max(0.8, Number((value - 0.1).toFixed(1))));
+  const zoomIn = () => setZoom((value) => Math.min(2, Number((value + 0.1).toFixed(1))));
+  const resetZoom = () => setZoom(1);
 
   if (error) {
     return (
@@ -236,6 +277,39 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={zoomOut}
+              disabled={zoom <= 0.8}
+              className="h-8 w-8 rounded-lg"
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <button
+              type="button"
+              onClick={resetZoom}
+              className="min-w-14 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+              aria-label="Reset zoom"
+              title="Reset zoom"
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={zoomIn}
+              disabled={zoom >= 2}
+              className="h-8 w-8 rounded-lg"
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -279,11 +353,15 @@ function PdfFlipbook({ pdfUrl, title }: PdfFlipbookProps) {
             className={`relative grid w-full max-w-5xl gap-3 [perspective:1600px] ${
               isSpread ? 'grid-cols-2' : 'grid-cols-1 max-w-xl'
             }`}
+            style={{
+              width: `${zoom * 100}%`,
+              maxWidth: isSpread ? `${64 * zoom}rem` : `${36 * zoom}rem`,
+            }}
           >
-            <RenderedPdfPage pdfDocument={pdfDocument} pageNumber={currentPage} title={title} />
+            <RenderedPdfPage pdfDocument={pdfDocument} pageNumber={currentPage} title={title} zoom={zoom} />
             {isSpread && (
               rightPage ? (
-                <RenderedPdfPage pdfDocument={pdfDocument} pageNumber={rightPage} title={title} />
+                <RenderedPdfPage pdfDocument={pdfDocument} pageNumber={rightPage} title={title} zoom={zoom} />
               ) : (
                 <div className="book-page hidden min-h-[520px] rounded-r-2xl border border-slate-200 bg-white/70 shadow-xl dark:border-slate-800 dark:bg-slate-900/70 sm:block" />
               )
@@ -300,10 +378,12 @@ function RenderedPdfPage({
   pdfDocument,
   pageNumber,
   title,
+  zoom,
 }: {
   pdfDocument: PDFDocumentProxy;
   pageNumber: number;
   title: string;
+  zoom: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rendering, setRendering] = useState(true);
@@ -319,7 +399,7 @@ function RenderedPdfPage({
         return;
       }
 
-      const viewport = page.getViewport({ scale: 1.3 });
+      const viewport = page.getViewport({ scale: 1.25 * zoom });
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
 
@@ -348,7 +428,7 @@ function RenderedPdfPage({
       cancelled = true;
       renderTask?.cancel();
     };
-  }, [pageNumber, pdfDocument]);
+  }, [pageNumber, pdfDocument, zoom]);
 
   return (
     <div className="book-page relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.18)] dark:border-slate-800">

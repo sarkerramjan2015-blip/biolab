@@ -52,7 +52,7 @@ const initialFormData = {
   subject: 'botany' as SubjectKey,
   id: '',
   title: '',
-  writerName: 'জাহিদ স্যার',
+  writerName: 'জাহিদুল হাসান',
   resourceTitle: '',
   resourceKind: 'pdf' as NonNullable<WriterContent['resourceKind']>,
   hasSolve: false,

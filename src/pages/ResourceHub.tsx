@@ -78,7 +78,7 @@ function filterHiddenResources(chapters: ChapterDoc[], hiddenUrls: Set<string>) 
 }
 
 export default function ResourceHub() {
-  const { chapters, loading } = useChapters();
+  const { chapters } = useChapters();
   const { hiddenUrls } = useResourceControls();
 
   const botanyChapters = filterHiddenResources(mergeChapters([
@@ -110,7 +110,7 @@ export default function ResourceHub() {
       className="mx-auto max-w-7xl space-y-8 sm:space-y-10"
     >
       <Seo
-        title="Resource Hub"
+        title="স্পেশাল PDF কালেকশন"
         description="Browse BIO LAB chapter-wise botany, zoology, and SSC biology PDFs, solve sheets, and solve class videos."
       />
       <header className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -124,14 +124,14 @@ export default function ResourceHub() {
                 className="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-700 shadow-sm backdrop-blur dark:border-teal-900/60 dark:bg-slate-950/60 dark:text-teal-300"
               >
                 <SearchCheck className="h-4 w-4" />
-                Open Access Archive
+                স্পেশাল PDF কালেকশন
               </motion.div>
               <h1 className="max-w-3xl text-3xl font-extrabold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl">
-                সব Biology PDF, solve sheet আর class resource এক জায়গায়।
+                Biology preparation-এর সব দরকারি resource এক স্পেশাল কালেকশনে।
               </h1>
               <p className="mt-4 max-w-2xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
-                HSC Botany, HSC Zoology এবং SSC Biology chapter অনুযায়ী সাজানো হয়েছে। আপাতত asset folder-এর
-                PDF গুলো সরাসরি reader ও download flow-তে যুক্ত করা আছে।
+                HSC Botany, HSC Zoology এবং SSC Biology chapter অনুযায়ী compact ভাবে সাজানো। দ্রুত খুঁজে পড়া,
+                reader-এ খোলা, আর download করার flow একই জায়গায় রাখা হয়েছে।
               </p>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -142,7 +142,7 @@ export default function ResourceHub() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-white/70 bg-white/80 p-4 text-center shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/60"
+                  className="archive-resource rounded-2xl border border-white/70 bg-white/80 p-3 text-center shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/60"
                 >
                   <p className="text-2xl font-extrabold text-slate-950 dark:text-white">{item.value}</p>
                   <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -155,25 +155,19 @@ export default function ResourceHub() {
         </div>
       </header>
 
-      {loading && (
-        <div className="rounded-2xl border border-teal-100 bg-teal-50/80 px-4 py-3 text-sm font-bold text-teal-800 dark:border-teal-900 dark:bg-teal-950/30 dark:text-teal-200">
-          Admin content sync হচ্ছে, local PDF archive ready আছে।
-        </div>
-      )}
-
       <Tabs defaultValue="botany" className="w-full">
-          <TabsList className="sticky top-16 z-20 mb-8 flex h-auto w-full justify-start gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-lg shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-none md:top-0 md:justify-center">
-            <TabsTrigger value="botany" className="min-w-max rounded-xl px-5 py-3 text-sm font-bold transition-all data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-teal-500/20 sm:px-8 sm:text-base">
+          <TabsList className="sticky top-16 z-20 mb-5 flex h-auto w-full justify-start gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-lg shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-none md:top-0 md:justify-center">
+            <TabsTrigger value="botany" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-teal-500/20 sm:px-7 sm:text-base">
               <span className="flex items-center gap-2">
                 <GraduationCap className="h-5 w-5" /> উদ্ভিদবিজ্ঞান
               </span>
             </TabsTrigger>
-            <TabsTrigger value="zoology" className="min-w-max rounded-xl px-5 py-3 text-sm font-bold transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 sm:px-8 sm:text-base">
+            <TabsTrigger value="zoology" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 sm:px-7 sm:text-base">
               <span className="flex items-center gap-2">
                 <Microscope className="h-5 w-5" /> প্রাণিবিজ্ঞান
               </span>
             </TabsTrigger>
-            <TabsTrigger value="ssc" className="min-w-max rounded-xl px-5 py-3 text-sm font-bold transition-all data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/20 sm:px-8 sm:text-base">
+            <TabsTrigger value="ssc" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/20 sm:px-7 sm:text-base">
               <span className="flex items-center gap-2">
                 <Book className="h-5 w-5" /> SSC Biology
               </span>
@@ -198,7 +192,7 @@ export default function ResourceHub() {
 
 function ChapterGrid({ chapters, colorTheme }: { chapters: ChapterDoc[]; colorTheme: ColorTheme }) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-2.5">
       {chapters.map((chapter, index) => (
         <motion.div
           key={chapter.docId || `${chapter.subject}-${chapter.id}-${index}`}
@@ -236,6 +230,8 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
   }[colorTheme];
 
   const availablePdfs = chapter.writers.filter((writer) => writer.pdfUrl).length;
+  const visibleWriters = chapter.writers.filter((writer) => writer.pdfUrl || writer.solve || writer.video);
+  const pendingWriterCount = chapter.writers.length - visibleWriters.length;
 
   const handleDownload = (writer: ChapterDoc['writers'][number]) => {
     if (!writer.pdfUrl) {
@@ -253,66 +249,69 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
   };
 
   return (
-    <Card className={`group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 ${themeStyles.card}`}>
+    <Card className={`archive-card group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 ${themeStyles.card}`}>
       <div className={`h-1 w-full bg-gradient-to-r ${themeStyles.gradient}`} />
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+        <div className="mb-2.5 flex items-start justify-between gap-2.5">
           <div className="min-w-0">
-            <p className={`mb-1.5 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.18em] ${themeStyles.text}`}>
+            <p className={`mb-1 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] ${themeStyles.text}`}>
               <span className={`h-2 w-2 rounded-full bg-gradient-to-r ${themeStyles.gradient}`} />
               অধ্যায় {chapter.id}
             </p>
-            <h3 className="text-lg font-extrabold leading-snug tracking-normal text-slate-950 dark:text-white sm:text-xl">
+            <h3 className="text-sm font-extrabold leading-snug tracking-normal text-slate-950 dark:text-white sm:text-base">
               {chapter.title}
             </h3>
-            <p className="mt-2 text-xs font-semibold text-slate-500">
+            <p className="mt-1 text-[10px] font-semibold text-slate-500">
               {subjectLabels[chapter.subject as SubjectKey] ?? chapter.subject}
             </p>
           </div>
-          <div className={`shrink-0 rounded-lg border px-2.5 py-2 text-center text-[11px] font-bold ${themeStyles.badge}`}>
+          <div className={`shrink-0 rounded-lg border px-2 py-1.5 text-center text-[10px] font-bold ${themeStyles.badge}`}>
             <span className="block text-sm leading-none">{availablePdfs}</span>
             PDF
           </div>
         </div>
 
-        <div className="flex-1 space-y-2.5">
-          {chapter.writers.map((writer, index) => {
+        <div className="flex-1 space-y-1.5">
+          {visibleWriters.map((writer, index) => {
             const title = writer.resourceTitle ?? writer.name;
             const hasPdf = Boolean(writer.pdfUrl);
 
             return (
               <div
                 key={`${writer.pdfUrl ?? writer.name}-${index}`}
-                className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition-colors hover:border-slate-200 hover:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:bg-slate-950"
+                className="archive-resource rounded-xl border border-slate-100 bg-slate-50/80 p-2 transition-colors hover:border-slate-200 hover:bg-white dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-slate-700 dark:hover:bg-slate-950"
               >
-                <div className="mb-2.5 flex items-start justify-between gap-3">
+                <div className="mb-1.5 flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h4 className="line-clamp-2 text-sm font-bold leading-6 text-slate-900 dark:text-slate-100">
+                    <h4 className="line-clamp-1 text-[13px] font-bold leading-5 text-slate-900 dark:text-slate-100">
                       {title}
                     </h4>
-                    <p className="mt-1 text-xs font-medium text-slate-500">
+                    <p className="mt-0.5 text-[10px] font-medium text-slate-500">
                       {writer.resourceTitle ? writer.name : hasPdf ? 'PDF resource' : 'Coming soon'}
                       {writer.sizeLabel ? ` • ${writer.sizeLabel}` : ''}
                     </p>
                   </div>
                   {writer.resourceKind && (
-                    <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${themeStyles.badge}`}>
+                    <span className={`shrink-0 rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${themeStyles.badge}`}>
                       {writer.resourceKind}
                     </span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {hasPdf ? (
                     <Link
-                      to="/reader"
+                      to={{
+                        pathname: '/reader',
+                        search: `?pdf=${encodeURIComponent(writer.pdfUrl!)}&title=${encodeURIComponent(`${chapter.title} - ${title}`)}`,
+                      }}
                       state={{ pdfUrl: writer.pdfUrl, title: `${chapter.title} - ${title}` }}
                       className="min-w-0"
                     >
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-9 w-full rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="h-7 w-full rounded-lg border border-slate-200 bg-white text-[11px] font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <FileText className="mr-1.5 h-3.5 w-3.5" /> পড়ো
                       </Button>
@@ -321,7 +320,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 rounded-lg border border-dashed border-slate-300 bg-slate-100 text-xs font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800/70"
+                      className="h-7 rounded-lg border border-dashed border-slate-300 bg-slate-100 text-[11px] font-bold text-slate-400 dark:border-slate-700 dark:bg-slate-800/70"
                       disabled
                     >
                       Coming Soon
@@ -332,7 +331,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                     size="sm"
                     onClick={() => handleDownload(writer)}
                     disabled={!hasPdf}
-                    className="h-9 w-full rounded-lg border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 hover:text-slate-950 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-white"
+                    className="h-7 w-full rounded-lg border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-600 hover:text-slate-950 disabled:opacity-35 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-white"
                     aria-label={`Download ${title}`}
                   >
                     <Download className="mr-1.5 h-3.5 w-3.5" />
@@ -359,10 +358,16 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
               </div>
             );
           })}
+
+          {pendingWriterCount > 0 && (
+            <div className="archive-resource rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-2.5 py-1.5 text-[10px] font-bold text-slate-500 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-400">
+              আরও {pendingWriterCount}টি resource শিগগিরই যোগ হবে
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
-          <span className={`inline-flex items-center text-xs font-extrabold uppercase tracking-[0.16em] ${themeStyles.text}`}>
+        <div className="mt-2.5 border-t border-slate-100 pt-2 dark:border-slate-800">
+          <span className={`inline-flex items-center text-[10px] font-extrabold uppercase tracking-[0.16em] ${themeStyles.text}`}>
             Chapter Resources <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </span>
         </div>

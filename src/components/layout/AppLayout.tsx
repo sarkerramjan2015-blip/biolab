@@ -18,7 +18,7 @@ export default function AppLayout() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
-    { name: 'PDF Archive', path: '/resources', icon: <Library className="w-5 h-5" /> },
+    { name: 'স্পেশাল PDF কালেকশন', path: '/resources', icon: <Library className="w-5 h-5" /> },
     { name: 'PDF Reader', path: '/reader', icon: <FileText className="w-5 h-5" /> },
     { name: 'Mentor', path: '/mentors', icon: <Users className="w-5 h-5" /> },
     { name: 'Solve', path: '/video', icon: <PlaySquare className="w-5 h-5" /> },
@@ -103,7 +103,7 @@ export default function AppLayout() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-72 flex flex-col">
+      <div className="min-w-0 flex-1 md:ml-72 flex flex-col">
         {/* Mobile Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/88 px-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/88 md:hidden">
           <Link to="/" className="flex flex-col">
@@ -177,7 +177,7 @@ export default function AppLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 xl:p-8">
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 xl:p-8">
           <Outlet />
         </main>
       </div>

@@ -2,7 +2,7 @@ import type { Chapter } from './resources';
 
 type ResourceSubject = 'botany' | 'zoology' | 'ssc';
 
-const mentorName = 'জাহিদ স্যার';
+const mentorName = 'জাহিদুল হাসান';
 
 export const localAssetChapters: Record<ResourceSubject, Chapter[]> = {
   botany: [

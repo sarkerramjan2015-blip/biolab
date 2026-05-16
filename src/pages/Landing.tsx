@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   ArrowRight,
+  Award,
   BookOpen,
   CheckCircle2,
   FileText,
+  GraduationCap,
   Layers,
   Library,
   LogOut,
@@ -21,13 +23,31 @@ import Seo from '@/src/components/Seo';
 import mentorPhoto from '../img/pic.jpeg';
 import SiteFooter from '@/src/components/site/SiteFooter';
 
-const typingPhrases = ['আরও পরিষ্কার', 'আরও দ্রুত', 'আরও সুন্দর'];
+const studentBenefits = [
+  {
+    icon: <Library className="h-5 w-5" />,
+    title: 'Chapter অনুযায়ী resource',
+    description: 'প্রয়োজনের PDF দ্রুত খুঁজে পাওয়া যায়, তাই পড়ার সময় নষ্ট হয় না।',
+  },
+  {
+    icon: <FileText className="h-5 w-5" />,
+    title: 'এক জায়গায় পড়া ও download',
+    description: 'PDF reader, preview, এবং download flow একই জায়গায় রাখা হয়েছে।',
+  },
+  {
+    icon: <BookOpen className="h-5 w-5" />,
+    title: 'পরীক্ষাভিত্তিক প্রস্তুতি',
+    description: 'SSC ও HSC-এর জন্য গোছানো note, solve sheet, এবং focused resource পাওয়া যায়।',
+  },
+  {
+    icon: <Users className="h-5 w-5" />,
+    title: 'Mentor-guided direction',
+    description: 'অভিজ্ঞ শিক্ষকের বাছাই করা উপকরণ দিয়ে পড়ার ধারাবাহিকতা ধরে রাখা সহজ হয়।',
+  },
+];
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [typedPhrase, setTypedPhrase] = useState('');
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
   const { user, login, logout, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -39,37 +59,10 @@ export default function Landing() {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'PDF Archive', path: '/resources' },
+    { name: 'স্পেশাল PDF কালেকশন', path: '/resources' },
     { name: 'Mentor', path: '/mentors' },
     { name: 'Admin Portal', path: '/admin/dashboard' },
   ];
-
-  useEffect(() => {
-    const activePhrase = typingPhrases[phraseIndex];
-    const isComplete = typedPhrase === activePhrase;
-    const isEmpty = typedPhrase.length === 0;
-    const timeout = window.setTimeout(() => {
-      if (!isDeleting && !isComplete) {
-        setTypedPhrase(activePhrase.slice(0, typedPhrase.length + 1));
-        return;
-      }
-
-      if (!isDeleting && isComplete) {
-        setIsDeleting(true);
-        return;
-      }
-
-      if (isDeleting && !isEmpty) {
-        setTypedPhrase(activePhrase.slice(0, typedPhrase.length - 1));
-        return;
-      }
-
-      setIsDeleting(false);
-      setPhraseIndex((current) => (current + 1) % typingPhrases.length);
-    }, !isDeleting && isComplete ? 1300 : isDeleting ? 55 : 90);
-
-    return () => window.clearTimeout(timeout);
-  }, [isDeleting, phraseIndex, typedPhrase]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
@@ -173,7 +166,7 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="bio-surface bio-grid relative overflow-hidden">
+        <section className="hero-surface relative overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 pb-10 pt-14 sm:px-6 sm:pb-14 sm:pt-20 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -181,19 +174,32 @@ export default function Landing() {
               transition={{ duration: 0.45 }}
               className="mx-auto max-w-5xl text-center"
             >
-              <div className="shine-chip mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-teal-700 shadow-sm backdrop-blur dark:border-teal-900/60 dark:bg-slate-950/60 dark:text-teal-300">
+              <div className="shine-chip relative mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-teal-100 shadow-sm backdrop-blur">
                 <Sparkles className="h-4 w-4" />
                 PDF-first SSC & HSC Biology Platform
               </div>
 
-              <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
-                Biology প্রস্তুতি এখন আরও পরিষ্কার, দ্রুত, সুন্দর।
+              <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-[1.08] tracking-normal sm:text-6xl lg:text-7xl">
+                <span className="text-white">Biology প্রস্তুতি এখন </span>
+                <span className="bg-gradient-to-r from-teal-200 via-cyan-100 to-indigo-200 bg-clip-text text-transparent">
+                  আরও পরিষ্কার, দ্রুত, সুন্দর।
+                </span>
               </h1>
-              <div className="shine-text mx-auto mt-3 min-h-10 max-w-3xl bg-gradient-to-r from-teal-600 to-indigo-600 bg-clip-text text-2xl font-extrabold text-transparent dark:from-teal-300 dark:to-indigo-300 sm:text-4xl">
-                {typedPhrase}
-                <span className="typing-caret ml-1 inline-block text-teal-600 dark:text-teal-300">|</span>
+              <div className="hero-brand-frame mx-auto mt-5 max-w-xl px-5 py-4 sm:px-8 sm:py-5">
+                <div className="hero-brand-window">
+                  <div className="hero-brand-track">
+                    <div className="hero-brand-slide">
+                      <p className="hero-brand-title text-3xl font-extrabold tracking-normal sm:text-5xl">BIO LAB</p>
+                    </div>
+                    <div className="hero-brand-slide">
+                      <p className="hero-brand-subtitle text-xl font-bold text-teal-100 sm:text-3xl">
+                        জীববিজ্ঞানে বিশুদ্ধ প্রস্তুতি
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="mx-auto mt-6 max-w-3xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-xl sm:leading-9">
+              <p className="mx-auto mt-6 max-w-3xl text-base font-medium leading-8 text-slate-200 sm:text-xl sm:leading-9">
                 দাগানো PDF, solve sheet, mentor guidance আর chapter-wise archive এক জায়গায়। মোবাইল, ট্যাব আর
                 ডেস্কটপে একইভাবে পড়ার মতো করে BIO LAB সাজানো হয়েছে।
               </p>
@@ -205,7 +211,7 @@ export default function Landing() {
                   </Button>
                 </Link>
                 <Link to="/dashboard" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="h-12 w-full rounded-xl border-slate-300 bg-white/80 px-7 text-base font-extrabold text-slate-800 backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-slate-950/50 dark:text-white sm:h-14">
+                  <Button size="lg" variant="outline" className="h-12 w-full rounded-xl border-white/30 bg-white/10 px-7 text-base font-extrabold text-white backdrop-blur hover:bg-white/20 sm:h-14">
                     পড়া শুরু করো
                   </Button>
                 </Link>
@@ -217,8 +223,8 @@ export default function Landing() {
                   'Chapter wise archive',
                   'Mentor guided flow',
                 ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/75 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-200">
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-600" />
+                  <div key={item} className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-bold text-white shadow-sm backdrop-blur">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-teal-200" />
                     {item}
                   </div>
                 ))}
@@ -248,6 +254,36 @@ export default function Landing() {
         </section>
 
         <section className="bg-slate-50 py-12 dark:bg-slate-950 sm:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-teal-700 dark:text-teal-300">
+                Student Benefits
+              </p>
+              <h2 className="mt-3 text-3xl font-extrabold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl">
+                একজন student BIO LAB থেকে কী সুবিধা পাবে
+              </h2>
+            </div>
+
+            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {studentBenefits.map((benefit) => (
+                <div
+                  key={benefit.title}
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">
+                    {benefit.icon}
+                  </span>
+                  <h3 className="mt-4 text-base font-extrabold text-slate-950 dark:text-white">{benefit.title}</h3>
+                  <p className="mt-2 text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">
+                    {benefit.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-50 py-12 dark:bg-slate-950 sm:py-16">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-center lg:px-8">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <img src={mentorPhoto} alt="BIO LAB mentor" className="h-72 w-full object-cover object-top sm:h-96 lg:h-[420px]" />
@@ -257,18 +293,19 @@ export default function Landing() {
                 Mentor led Biology
               </p>
               <h2 className="mt-3 max-w-3xl text-3xl font-extrabold leading-tight tracking-normal text-slate-950 dark:text-white sm:text-5xl">
-                Jahid Sir-এর biology resources এখন structured digital library।
+                জাহিদুল হাসানের অভিজ্ঞতায় গড়া structured Biology learning library।
               </h2>
               <p className="mt-4 max-w-2xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
-                BIO LAB-এ তার SSC ও HSC Biology PDF resources chapter অনুযায়ী সাজানো হয়েছে, যেন student খুব
-                সহজে পড়তে ও download করতে পারে।
+                Botany-তে BSc ও MSc সম্পন্ন, সামসুল হক খান স্কুল অ্যান্ড কলেজের সহকারী শিক্ষক জাহিদুল হাসান
+                প্রায় ১৫ বছর ধরে জীববিজ্ঞান পড়াচ্ছেন। তার বাছাই করা SSC ও HSC resource BIO LAB-এ chapter অনুযায়ী
+                সাজানো হয়েছে, যেন student সহজে পড়তে, revise করতে, এবং download করতে পারে।
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {[
-                  { icon: <BookOpen className="h-5 w-5" />, text: '35 PDF resources' },
-                  { icon: <FileText className="h-5 w-5" />, text: 'HSC + SSC organized' },
-                  { icon: <Users className="h-5 w-5" />, text: 'Jahid Sir guidance' },
-                  { icon: <CheckCircle2 className="h-5 w-5" />, text: 'Mobile first layout' },
+                  { icon: <GraduationCap className="h-5 w-5" />, text: 'BSc, MSc in Botany' },
+                  { icon: <Award className="h-5 w-5" />, text: 'প্রায় ১৫ বছরের অভিজ্ঞতা' },
+                  { icon: <Users className="h-5 w-5" />, text: 'সহকারী শিক্ষক' },
+                  { icon: <CheckCircle2 className="h-5 w-5" />, text: 'SSC + HSC focused' },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">

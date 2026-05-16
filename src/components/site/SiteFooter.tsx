@@ -67,7 +67,7 @@ export default function SiteFooter() {
               className="flex items-center gap-3 transition-colors hover:text-white"
             >
               <Phone className="h-4 w-4 shrink-0 text-emerald-300" />
-              <span>WhatsApp: 01549625831</span>
+              <span>WhatsApp: +8801849625831</span>
             </a>
           </address>
         </section>
@@ -93,7 +93,7 @@ export default function SiteFooter() {
             <Button
               type="submit"
               disabled={!name.trim() || !message.trim()}
-              className="shine-chip h-11 w-full rounded-lg bg-teal-500 font-bold text-slate-950 hover:bg-teal-400"
+              className="shine-chip relative h-11 w-full rounded-lg bg-teal-500 font-bold text-slate-950 hover:bg-teal-400"
             >
               <Send className="mr-2 h-4 w-4" />
               Send to WhatsApp
