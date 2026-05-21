@@ -42,4 +42,4 @@ export function isAdminUser(user: User | null) {
 }
 
 export const adminSetupHint =
-  'Local/private dev preview opens the admin dashboard. Production needs VITE_ADMIN_EMAILS plus Firebase admin custom claim.';
+  'Local/private dev preview opens the admin dashboard. Production write access needs this email in VITE_ADMIN_EMAILS and Firebase rules, or a Firebase admin custom claim.';

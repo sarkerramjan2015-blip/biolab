@@ -18,6 +18,7 @@ import {
   UploadCloud,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { FirebaseError } from 'firebase/app';
 import { useChapters, useResourceControls, type ChapterDoc } from '@/lib/content';
 import { isLocalAdminPreviewEnabled } from '@/lib/admin';
 import { storage } from '@/lib/firebase';
@@ -75,6 +76,32 @@ function safeStorageName(fileName: string) {
     .replace(/^-|-$/g, '');
 }
 
+function isPdfFile(file: File) {
+  return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+}
+
+function getUploadErrorMessage(error: unknown) {
+  if (error instanceof FirebaseError) {
+    if (error.code === 'storage/bucket-not-found') {
+      return 'Firebase Storage is not set up for this project yet. Open Firebase Console > Storage and click Get Started, then deploy Storage rules.';
+    }
+
+    if (error.code === 'storage/unauthorized' || error.code === 'permission-denied') {
+      return 'Upload blocked by Firebase permissions. Please deploy the latest Firestore/Storage rules or make sure this admin email has the admin claim.';
+    }
+
+    if (error.code === 'storage/quota-exceeded') {
+      return 'Firebase Storage quota is full. Please free storage or upgrade the Firebase plan.';
+    }
+
+    if (error.code === 'storage/retry-limit-exceeded' || error.code === 'storage/canceled') {
+      return 'Upload did not finish because the network was interrupted. Please try again with a stable connection.';
+    }
+  }
+
+  return 'Failed to upload PDF. Please check admin permissions and internet connection.';
+}
+
 function flattenBundledResources(hiddenUrls: Set<string>): AdminResource[] {
   return (Object.entries(localAssetChapters) as [SubjectKey, ChapterDoc[]][])
     .flatMap(([subject, chapters]) =>
@@ -123,6 +150,7 @@ export default function AdminDashboard() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState('');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const localAdminPreview = isLocalAdminPreviewEnabled();
 
@@ -182,7 +210,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (selectedFile.type !== 'application/pdf') {
+    if (!isPdfFile(selectedFile)) {
       window.alert('Only PDF files are allowed.');
       event.target.value = '';
       return;
@@ -211,11 +239,13 @@ export default function AdminDashboard() {
 
     setUploading(true);
     setProgress(0);
+    setUploadStatus('Preparing upload...');
 
     const storagePath = `pdfs/${Date.now()}_${safeStorageName(file.name) || 'resource.pdf'}`;
+    const storageRef = ref(storage, storagePath);
 
     try {
-      const storageRef = ref(storage, storagePath);
+      setUploadStatus('Uploading PDF...');
       const uploadTask = uploadBytesResumable(storageRef, file, {
         contentType: 'application/pdf',
       });
@@ -228,39 +258,54 @@ export default function AdminDashboard() {
           },
           (error) => reject(error),
           async () => {
+            setProgress(100);
             resolve(await getDownloadURL(uploadTask.snapshot.ref));
           },
         );
       });
 
-      await addChapter({
-        id: Number.parseInt(formData.id, 10) || 0,
-        title: formData.title,
-        subject: formData.subject,
-        writers: [
-          {
-            name: formData.writerName,
-            resourceTitle: formData.resourceTitle,
-            resourceKind: formData.resourceKind,
-            book: true,
-            solve: formData.hasSolve,
-            video: formData.hasVideo,
-            pdfUrl,
-            storagePath,
-            sizeLabel: formatBytes(file.size),
-          },
-        ],
-      });
+      setUploadStatus('Saving PDF entry...');
+
+      try {
+        await addChapter({
+          id: Number.parseInt(formData.id, 10) || 0,
+          title: formData.title,
+          subject: formData.subject,
+          writers: [
+            {
+              name: formData.writerName,
+              resourceTitle: formData.resourceTitle,
+              resourceKind: formData.resourceKind,
+              book: true,
+              solve: formData.hasSolve,
+              video: formData.hasVideo,
+              pdfUrl,
+              storagePath,
+              sizeLabel: formatBytes(file.size),
+            },
+          ],
+        });
+      } catch (metadataError) {
+        try {
+          await deleteObject(storageRef);
+        } catch (cleanupError) {
+          console.warn('Uploaded file cleanup failed after Firestore write error.', cleanupError);
+        }
+
+        throw metadataError;
+      }
 
       setIsOpen(false);
       setFormData(initialFormData);
       setFile(null);
       setProgress(0);
+      setUploadStatus('');
     } catch (error) {
       console.error('Error uploading PDF:', error);
-      window.alert('Failed to upload file. Please check admin permissions.');
+      window.alert(getUploadErrorMessage(error));
     } finally {
       setUploading(false);
+      setUploadStatus('');
     }
   };
 
@@ -452,6 +497,7 @@ export default function AdminDashboard() {
                         onChange={handleFileChange}
                         className="hidden"
                         id="pdf-upload"
+                        disabled={uploading}
                       />
                       <label htmlFor="pdf-upload" className="flex cursor-pointer flex-col items-center gap-2">
                         <UploadCloud className="h-8 w-8 text-orange-500" />
@@ -465,6 +511,11 @@ export default function AdminDashboard() {
                       <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                         <div className="h-full rounded-full bg-orange-600 transition-all" style={{ width: `${progress}%` }} />
                       </div>
+                    )}
+                    {uploadStatus && (
+                      <p className="mt-2 text-xs font-bold text-orange-600 dark:text-orange-300" aria-live="polite">
+                        {uploadStatus} {progress > 0 ? `${Math.round(progress)}%` : ''}
+                      </p>
                     )}
                   </div>
                   <Button type="submit" disabled={uploading} className="h-11 w-full rounded-xl bg-orange-600 font-bold text-white hover:bg-orange-700">

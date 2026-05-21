@@ -6,7 +6,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.admin == true;
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        request.auth.token.email in [
+          'biolabjahid@gmail.com',
+          'sarkerramjan2015@gmail.com'
+        ]
+      );
     }
 
     function expectedChapterLockId(userId, level, subject, chapterName, dayKey) {
