@@ -30,10 +30,6 @@ import {
   type QuestionDifficulty,
   getExamName,
 } from '@/src/data/exam';
-import {
-  getStarterQuestionsByIds,
-  getStarterQuestionsForExam,
-} from '@/src/data/starter-mcq';
 
 export type McqQuestion = {
   id: string;
@@ -42,12 +38,14 @@ export type McqQuestion = {
   testType: ExamTestType;
   chapterName?: string;
   questionText: string;
+  questionImageUrl?: string | null;
   optionA: string;
   optionB: string;
   optionC: string;
   optionD: string;
   correctOption: AnswerOption;
   explanation: string;
+  explanationImageUrl?: string | null;
   difficulty: QuestionDifficulty;
   status: ContentStatus;
   createdAt: number;
@@ -219,21 +217,14 @@ export async function fetchQuestionsForExam(config: ExamConfig) {
   const snapshot = await getDocs(query(collection(db, 'mcqQuestions'), ...conditions));
   const liveQuestions = snapshot.docs.map(toQuestion);
 
-  if (liveQuestions.length >= TOTAL_QUESTIONS) {
-    return liveQuestions;
-  }
-
-  return [
-    ...liveQuestions,
-    ...getStarterQuestionsForExam(config),
-  ];
+  return liveQuestions;
 }
 
 export async function startExamAttempt(config: ExamConfig, user: User) {
   const availableQuestions = await fetchQuestionsForExam(config);
 
-  if (availableQuestions.length < TOTAL_QUESTIONS) {
-    throw new NotEnoughQuestionsError(availableQuestions.length);
+  if (availableQuestions.length === 0) {
+    throw new Error('No active questions are available for this exam yet.');
   }
 
   const selectedQuestions = shuffle(availableQuestions).slice(0, TOTAL_QUESTIONS);
@@ -251,7 +242,7 @@ export async function startExamAttempt(config: ExamConfig, user: User) {
     testType: config.testType,
     chapterName: config.chapterName,
     examName: getExamName(config),
-    totalQuestions: TOTAL_QUESTIONS,
+    totalQuestions: selectedQuestions.length,
     questionIds: selectedQuestions.map((question) => question.id),
     selectedAnswers: {},
     startedAt: Date.now(),
@@ -328,20 +319,14 @@ export function useExamAttempt(attemptId: string | null) {
 }
 
 export async function fetchQuestionsByIds(questionIds: string[]) {
-  const starterQuestions = getStarterQuestionsByIds(questionIds);
-  const starterQuestionIds = new Set(starterQuestions.map((question) => question.id));
-  const liveQuestionIdsToFetch = questionIds.filter((questionId) => !starterQuestionIds.has(questionId));
   const snapshots = await Promise.all(
-    liveQuestionIdsToFetch.map((questionId) => getDoc(doc(db, 'mcqQuestions', questionId))),
+    questionIds.map((questionId) => getDoc(doc(db, 'mcqQuestions', questionId))),
   );
   const liveQuestions = snapshots
     .filter((snapshot) => snapshot.exists())
     .map((snapshot) => toQuestion(snapshot));
 
-  return [
-    ...liveQuestions,
-    ...starterQuestions,
-  ];
+  return liveQuestions;
 }
 
 export async function saveAttemptAnswerSelection(
@@ -479,6 +464,46 @@ export function useExamAttempts() {
 
     return () => unsubscribe();
   }, []);
+
+  return { attempts, loading };
+}
+
+export function useStudentExamAttempts(userId: string | undefined) {
+  const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setAttempts([]);
+      setLoading(false);
+      return;
+    }
+    const q = query(
+      collection(db, 'examAttempts'),
+      where('userId', '==', userId)
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const list = snapshot.docs
+          .map((item) => ({ id: item.id, ...(item.data() as Omit<ExamAttempt, 'id'>) }))
+          .filter((attempt) => attempt.status === 'submitted');
+        
+        // Sort client-side by submittedAt desc
+        list.sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0));
+        
+        setAttempts(list);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching student exam attempts:', error);
+        setAttempts([]);
+        setLoading(false);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [userId]);
 
   return { attempts, loading };
 }

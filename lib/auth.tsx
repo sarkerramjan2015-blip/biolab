@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { FirebaseError } from "firebase/app";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { auth, signInWithGoogle, logOut } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, signInWithGoogle, logOut, db } from "./firebase";
 
 interface AuthContextType {
   user: User | null;
+  isAdmin: boolean;
   loading: boolean;
   loginError: string | null;
   login: () => Promise<boolean>;
@@ -15,12 +17,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      if (user) {
+        try {
+          const docRef = doc(db, 'admins', user.uid);
+          const docSnap = await getDoc(docRef);
+          setIsAdmin(docSnap.exists());
+        } catch (e) {
+          console.error("Failed to check admin status", e);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
 
@@ -61,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginError, login, logout }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, loginError, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

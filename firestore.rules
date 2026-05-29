@@ -8,10 +8,7 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.admin == true ||
-        request.auth.token.email in [
-          'biolabjahid@gmail.com',
-          'sarkerramjan2015@gmail.com'
-        ]
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
 
@@ -114,6 +111,16 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/examAttempts/$(request.resource.data.attemptId)).data.status == 'submitted'
         && request.resource.data.questionId in get(/databases/$(database)/documents/examAttempts/$(request.resource.data.attemptId)).data.questionIds
         && answerId == request.resource.data.attemptId + '_' + request.resource.data.questionId;
+      allow update, delete: if isAdmin();
+    }
+
+    match /pdfDownloads/{downloadId} {
+      allow read: if isAdmin() || (
+        isSignedIn()
+        && resource.data.userId == request.auth.uid
+      );
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
   }

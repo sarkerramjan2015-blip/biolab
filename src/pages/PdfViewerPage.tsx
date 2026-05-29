@@ -17,12 +17,16 @@ import { AnimatePresence, motion } from 'motion/react';
 import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy } from 'pdfjs-dist';
 import pdfWorkerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import Seo from '@/src/components/Seo';
+import { useAuth } from '@/lib/auth';
+import { trackPdfDownload } from '@/lib/content';
 
 GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 type PdfRouteState = {
   pdfUrl?: string;
   title?: string;
+  subject?: string;
+  chapter?: string | number;
 };
 
 type PdfFlipbookProps = {
@@ -31,16 +35,45 @@ type PdfFlipbookProps = {
 };
 
 export default function PdfViewerPage() {
+  const { user } = useAuth();
   const location = useLocation();
   const routeState = (location.state ?? {}) as PdfRouteState;
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const pdfUrl = routeState.pdfUrl ?? searchParams.get('pdf') ?? undefined;
   const title = routeState.title ?? searchParams.get('title') ?? 'BIO LAB PDF Reader';
+  const subject = routeState.subject ?? searchParams.get('subject') ?? 'Reader View';
+  const chapter = routeState.chapter ?? searchParams.get('chapter') ?? 'Reader View';
+
+  useEffect(() => {
+    if (user && pdfUrl) {
+      trackPdfDownload({
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName,
+        pdfUrl: pdfUrl,
+        pdfTitle: title,
+        subject: subject,
+        chapter: chapter,
+      });
+    }
+  }, [user, pdfUrl, title, subject, chapter]);
 
   const handleDownload = () => {
     if (!pdfUrl) {
       window.alert('এই PDF এখনো upload করা হয়নি।');
       return;
+    }
+
+    if (user) {
+      trackPdfDownload({
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName,
+        pdfUrl: pdfUrl,
+        pdfTitle: title,
+        subject: subject.includes('Download') ? subject : `${subject} (Download)`,
+        chapter: chapter,
+      });
     }
 
     const link = document.createElement('a');

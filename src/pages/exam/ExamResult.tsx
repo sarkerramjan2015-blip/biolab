@@ -184,6 +184,9 @@ export default function ExamResult() {
                 <h3 className="mt-3 text-base font-extrabold leading-7 text-slate-950 dark:text-white">
                   {question.questionText}
                 </h3>
+                {question.questionImageUrl && (
+                  <img src={question.questionImageUrl} alt="Question" className="mt-3 max-h-48 w-full rounded-lg object-contain object-left" />
+                )}
                 <div className="mt-4 grid gap-3 text-sm font-medium sm:grid-cols-2">
                   <div className="rounded-xl bg-red-50 p-4 text-red-900 dark:bg-red-950/30 dark:text-red-100">
                     <p className="text-xs font-bold uppercase tracking-[0.16em]">Your Answer</p>
@@ -199,6 +202,9 @@ export default function ExamResult() {
                   <p className="mt-2 text-sm font-medium leading-7 text-slate-700 dark:text-slate-200">
                     {question.explanation}
                   </p>
+                  {question.explanationImageUrl && (
+                    <img src={question.explanationImageUrl} alt="Explanation" className="mt-3 max-h-48 w-full rounded-lg object-contain object-left" />
+                  )}
                 </div>
               </Card>
             ))

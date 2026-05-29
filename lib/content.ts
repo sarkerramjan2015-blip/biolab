@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, writeBatch, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, getDocs, writeBatch, query, orderBy, where, addDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import { Chapter, botanyChapters, zoologyChapters, sscBiologyChapters } from '@/src/data/resources';
-import { isAdminUser } from './admin';
+import { useAuth } from './auth';
 
 export type ChapterDoc = Chapter & { subject: string; docId?: string; createdAt?: number };
 export type ResourceControl = {
@@ -19,6 +19,7 @@ function resourceControlId(pdfUrl: string) {
 export function useChapters() {
   const [chapters, setChapters] = useState<ChapterDoc[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const q = query(collection(db, 'chapters'), orderBy('createdAt', 'asc'));
@@ -37,10 +38,10 @@ export function useChapters() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isAdmin]);
 
   const seedInitialData = async () => {
-    if (!isAdminUser(auth.currentUser)) {
+    if (!isAdmin) {
       console.log("Not an admin, skipping initial data seed");
       return;
     }
@@ -114,4 +115,81 @@ export function useResourceControls() {
   };
 
   return { controls, hiddenUrls, loading, setResourceHidden };
+}
+
+export interface TrackPdfDownloadInput {
+  userId: string;
+  userEmail?: string | null;
+  userName?: string | null;
+  pdfUrl: string;
+  pdfTitle: string;
+  subject?: string;
+  chapter?: string | number;
+}
+
+export async function trackPdfDownload({
+  userId,
+  userEmail,
+  userName,
+  pdfUrl,
+  pdfTitle,
+  subject,
+  chapter,
+}: TrackPdfDownloadInput) {
+  try {
+    const downloadsRef = collection(db, 'pdfDownloads');
+    await addDoc(downloadsRef, {
+      userId,
+      userEmail: userEmail || null,
+      userName: userName || null,
+      pdfId: pdfUrl,
+      pdfTitle,
+      subject: subject || 'unknown',
+      chapter: chapter !== undefined ? String(chapter) : 'unknown',
+      downloadedAt: Date.now(),
+      fileUrl: pdfUrl,
+    });
+    console.log('PDF view/download tracked successfully in Firestore');
+  } catch (error) {
+    console.error('Error tracking PDF download:', error);
+  }
+}
+
+export function useStudentPdfDownloads(userId: string | undefined) {
+  const [downloads, setDownloads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setDownloads([]);
+      setLoading(false);
+      return;
+    }
+    const q = query(
+      collection(db, 'pdfDownloads'),
+      where('userId', '==', userId)
+    );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const list = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        // Sort client-side by downloadedAt descending
+        list.sort((a: any, b: any) => (b.downloadedAt ?? 0) - (a.downloadedAt ?? 0));
+        setDownloads(list);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching student PDF downloads:', error);
+        setDownloads([]);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [userId]);
+
+  return { downloads, loading };
 }

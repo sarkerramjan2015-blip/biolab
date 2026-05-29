@@ -1,13 +1,5 @@
 import type { User } from 'firebase/auth';
 
-const defaultAdminEmails = 'biolabjahid@gmail.com,sarkerramjan2015@gmail.com';
-const configuredAdminEmails = import.meta.env.VITE_ADMIN_EMAILS?.trim();
-
-export const adminEmails = (configuredAdminEmails || defaultAdminEmails)
-  .split(',')
-  .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
-
 function isPrivateDevelopmentHost(hostname: string) {
   const host = hostname.replace(/^\[|\]$/g, '');
 
@@ -29,17 +21,7 @@ export function isLocalAdminPreviewEnabled() {
   return previewAllowed && isPrivateDevelopmentHost(window.location.hostname);
 }
 
-export function isAdminUser(user: User | null) {
-  if (!user?.email) {
-    return false;
-  }
 
-  if (isLocalAdminPreviewEnabled()) {
-    return true;
-  }
-
-  return adminEmails.includes(user.email.toLowerCase());
-}
 
 export const adminSetupHint =
   'Local/private dev preview opens the admin dashboard. Production write access needs this email in VITE_ADMIN_EMAILS and Firebase rules, or a Firebase admin custom claim.';

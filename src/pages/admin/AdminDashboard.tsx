@@ -21,14 +21,14 @@ import { motion } from 'motion/react';
 import { FirebaseError } from 'firebase/app';
 import { useChapters, useResourceControls, type ChapterDoc } from '@/lib/content';
 import { isLocalAdminPreviewEnabled } from '@/lib/admin';
+import { useCloudinaryWidget } from '@/lib/useCloudinaryWidget';
 import { storage } from '@/lib/firebase';
-import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import Seo from '@/src/components/Seo';
 import { localAssetChapters } from '@/src/data/localResources';
 import type { WriterContent } from '@/src/data/resources';
 import adminImage from '../../img/pic.jpeg';
 
-const MAX_PDF_SIZE = 50 * 1024 * 1024;
+
 
 type SubjectKey = 'botany' | 'zoology' | 'ssc';
 type AdminResource = {
@@ -60,47 +60,7 @@ const initialFormData = {
   hasVideo: false,
 };
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024 * 1024) {
-    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  }
 
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function safeStorageName(fileName: string) {
-  return fileName
-    .toLowerCase()
-    .replace(/[^a-z0-9.\-\u0980-\u09FF]+/gi, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-function isPdfFile(file: File) {
-  return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-}
-
-function getUploadErrorMessage(error: unknown) {
-  if (error instanceof FirebaseError) {
-    if (error.code === 'storage/bucket-not-found') {
-      return 'Firebase Storage is not set up for this project yet. Open Firebase Console > Storage and click Get Started, then deploy Storage rules.';
-    }
-
-    if (error.code === 'storage/unauthorized' || error.code === 'permission-denied') {
-      return 'Upload blocked by Firebase permissions. Please deploy the latest Firestore/Storage rules or make sure this admin email has the admin claim.';
-    }
-
-    if (error.code === 'storage/quota-exceeded') {
-      return 'Firebase Storage quota is full. Please free storage or upgrade the Firebase plan.';
-    }
-
-    if (error.code === 'storage/retry-limit-exceeded' || error.code === 'storage/canceled') {
-      return 'Upload did not finish because the network was interrupted. Please try again with a stable connection.';
-    }
-  }
-
-  return 'Failed to upload PDF. Please check admin permissions and internet connection.';
-}
 
 function flattenBundledResources(hiddenUrls: Set<string>): AdminResource[] {
   return (Object.entries(localAssetChapters) as [SubjectKey, ChapterDoc[]][])
@@ -147,12 +107,25 @@ export default function AdminDashboard() {
   const { hiddenUrls, loading: controlsLoading, setResourceHidden } = useResourceControls();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  const [file, setFile] = useState<File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState('');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const localAdminPreview = isLocalAdminPreviewEnabled();
+
+  const { openWidget: openPdfWidget, isReady: isPdfWidgetReady } = useCloudinaryWidget({
+    resourceType: 'raw',
+    folder: 'biolab/pdfs',
+    clientAllowedFormats: ['pdf'],
+    onSuccess: (secureUrl) => {
+      setPdfUrl(secureUrl);
+      window.alert('PDF uploaded successfully!');
+    },
+    onError: () => {
+      window.alert('Upload failed. Please try again.');
+    }
+  });
 
   useEffect(() => {
     const openUploadSheet = () => setIsOpen(true);
@@ -202,110 +175,44 @@ export default function AdminDashboard() {
     bundled: resources.filter((resource) => resource.origin === 'bundled').length,
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0] ?? null;
-
-    if (!selectedFile) {
-      setFile(null);
-      return;
-    }
-
-    if (!isPdfFile(selectedFile)) {
-      window.alert('Only PDF files are allowed.');
-      event.target.value = '';
-      return;
-    }
-
-    if (selectedFile.size > MAX_PDF_SIZE) {
-      window.alert('PDF size must be 50MB or less.');
-      event.target.value = '';
-      return;
-    }
-
-    setFile(selectedFile);
-    setFormData((current) => ({
-      ...current,
-      resourceTitle: current.resourceTitle || selectedFile.name.replace(/\.pdf$/i, ''),
-    }));
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!file) {
-      window.alert('Please select a PDF file first.');
+    if (!pdfUrl.trim()) {
+      window.alert('Please provide a PDF URL.');
       return;
     }
 
     setUploading(true);
-    setProgress(0);
-    setUploadStatus('Preparing upload...');
-
-    const storagePath = `pdfs/${Date.now()}_${safeStorageName(file.name) || 'resource.pdf'}`;
-    const storageRef = ref(storage, storagePath);
 
     try {
-      setUploadStatus('Uploading PDF...');
-      const uploadTask = uploadBytesResumable(storageRef, file, {
-        contentType: 'application/pdf',
-      });
-
-      const pdfUrl = await new Promise<string>((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            setProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+      await addChapter({
+        id: Number.parseInt(formData.id, 10) || 0,
+        title: formData.title,
+        subject: formData.subject,
+        writers: [
+          {
+            name: formData.writerName,
+            resourceTitle: formData.resourceTitle,
+            resourceKind: formData.resourceKind,
+            book: true,
+            solve: formData.hasSolve,
+            video: formData.hasVideo,
+            pdfUrl: pdfUrl.trim(),
+            storagePath: '',
+            sizeLabel: '',
           },
-          (error) => reject(error),
-          async () => {
-            setProgress(100);
-            resolve(await getDownloadURL(uploadTask.snapshot.ref));
-          },
-        );
+        ],
       });
-
-      setUploadStatus('Saving PDF entry...');
-
-      try {
-        await addChapter({
-          id: Number.parseInt(formData.id, 10) || 0,
-          title: formData.title,
-          subject: formData.subject,
-          writers: [
-            {
-              name: formData.writerName,
-              resourceTitle: formData.resourceTitle,
-              resourceKind: formData.resourceKind,
-              book: true,
-              solve: formData.hasSolve,
-              video: formData.hasVideo,
-              pdfUrl,
-              storagePath,
-              sizeLabel: formatBytes(file.size),
-            },
-          ],
-        });
-      } catch (metadataError) {
-        try {
-          await deleteObject(storageRef);
-        } catch (cleanupError) {
-          console.warn('Uploaded file cleanup failed after Firestore write error.', cleanupError);
-        }
-
-        throw metadataError;
-      }
 
       setIsOpen(false);
       setFormData(initialFormData);
-      setFile(null);
-      setProgress(0);
-      setUploadStatus('');
+      setPdfUrl('');
     } catch (error) {
-      console.error('Error uploading PDF:', error);
-      window.alert(getUploadErrorMessage(error));
+      console.error('Error adding PDF:', error);
+      window.alert('Failed to save PDF. Please check admin permissions.');
     } finally {
       setUploading(false);
-      setUploadStatus('');
     }
   };
 
@@ -341,14 +248,6 @@ export default function AdminDashboard() {
     setBusyKey(resource.key);
 
     try {
-      if (resource.writer.storagePath) {
-        try {
-          await deleteObject(ref(storage, resource.writer.storagePath));
-        } catch (storageError) {
-          console.warn('Storage file delete failed. Continuing with Firestore cleanup.', storageError);
-        }
-      }
-
       const chapter = chapters.find((item) => item.docId === resource.docId);
       if (!chapter) {
         throw new Error('Chapter document was not found.');
@@ -489,34 +388,28 @@ export default function AdminDashboard() {
                     </label>
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-bold text-slate-700 dark:text-slate-300">PDF File</label>
-                    <div className="rounded-2xl border-2 border-dashed border-slate-300 p-5 text-center transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50">
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="pdf-upload"
-                        disabled={uploading}
-                      />
-                      <label htmlFor="pdf-upload" className="flex cursor-pointer flex-col items-center gap-2">
-                        <UploadCloud className="h-8 w-8 text-orange-500" />
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          {file ? file.name : 'Click to select PDF'}
-                        </span>
-                        <span className="text-xs text-slate-500">PDF up to 50MB</span>
-                      </label>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">PDF URL</label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={!isPdfWidgetReady}
+                        onClick={openPdfWidget}
+                        className="h-7 text-xs"
+                      >
+                        <UploadCloud className="mr-1.5 h-3.5 w-3.5" /> Upload from computer
+                      </Button>
                     </div>
-                    {progress > 0 && (
-                      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div className="h-full rounded-full bg-orange-600 transition-all" style={{ width: `${progress}%` }} />
-                      </div>
-                    )}
-                    {uploadStatus && (
-                      <p className="mt-2 text-xs font-bold text-orange-600 dark:text-orange-300" aria-live="polite">
-                        {uploadStatus} {progress > 0 ? `${Math.round(progress)}%` : ''}
-                      </p>
-                    )}
+                    <input
+                      type="text"
+                      required
+                      placeholder="/pdfs/example.pdf or https://..."
+                      value={pdfUrl}
+                      onChange={(event) => setPdfUrl(event.target.value)}
+                      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-900"
+                    />
+                    <p className="mt-1 text-xs text-slate-500">Paste a URL or click "Upload from computer" to host a new PDF.</p>
                   </div>
                   <Button type="submit" disabled={uploading} className="h-11 w-full rounded-xl bg-orange-600 font-bold text-white hover:bg-orange-700">
                     {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Save PDF'}
@@ -684,7 +577,7 @@ export default function AdminDashboard() {
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           {[
-            ['Upload', 'PDF select kore chapter info diye Save PDF.'],
+            ['Upload', 'URL and chapter info diye Save PDF.'],
             ['Hide/Show', 'PDF list theke website-e show/hide control koro.'],
             ['Delete', 'Uploaded PDF delete kora jabe; bundled PDF hide kora safe.'],
           ].map(([title, description]) => (

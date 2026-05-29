@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
-import { CheckCircle2, Pencil, Plus, Search, Trash2, XCircle } from 'lucide-react';
+import { useMemo, useState, useRef } from 'react';
+import { CheckCircle2, Pencil, Plus, Search, Trash2, XCircle, UploadCloud, Download } from 'lucide-react';
 import { doc, writeBatch } from 'firebase/firestore';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Seo from '@/src/components/Seo';
 import { db } from '@/lib/firebase';
+import { useCloudinaryWidget } from '@/lib/useCloudinaryWidget';
 import {
   useMcqQuestions,
   type McqQuestion,
@@ -23,7 +25,6 @@ import {
   type ExamTestType,
   type QuestionDifficulty,
 } from '@/src/data/exam';
-import { starterMcqQuestions } from '@/src/data/starter-mcq';
 
 type QuestionFormState = {
   level: ExamLevel;
@@ -39,6 +40,8 @@ type QuestionFormState = {
   explanation: string;
   difficulty: QuestionDifficulty;
   status: ContentStatus;
+  questionImageUrl: string;
+  explanationImageUrl: string;
 };
 
 const initialFormState: QuestionFormState = {
@@ -55,6 +58,8 @@ const initialFormState: QuestionFormState = {
   explanation: '',
   difficulty: 'Easy',
   status: 'active',
+  questionImageUrl: '',
+  explanationImageUrl: '',
 };
 
 function getSubjects(level: ExamLevel): ExamSubject[] {
@@ -84,6 +89,8 @@ function toFormState(question: McqQuestion): QuestionFormState {
     explanation: question.explanation,
     difficulty: question.difficulty,
     status: question.status,
+    questionImageUrl: question.questionImageUrl || '',
+    explanationImageUrl: question.explanationImageUrl || '',
   };
 }
 
@@ -102,6 +109,8 @@ function toQuestionInput(formState: QuestionFormState): McqQuestionInput {
     explanation: formState.explanation.trim(),
     difficulty: formState.difficulty,
     status: formState.status,
+    questionImageUrl: formState.questionImageUrl.trim() || null,
+    explanationImageUrl: formState.explanationImageUrl.trim() || null,
   };
 }
 
@@ -132,7 +141,30 @@ export default function AdminMcq() {
   const [subjectFilter, setSubjectFilter] = useState<'all' | ExamSubject>('all');
   const [testTypeFilter, setTestTypeFilter] = useState<'all' | ExamTestType>('all');
   const [saving, setSaving] = useState(false);
-  const [importingStarters, setImportingStarters] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { openWidget: openQuestionImageWidget, isReady: isQuestionWidgetReady } = useCloudinaryWidget({
+    resourceType: 'image',
+    folder: 'biolab/mcq-images',
+    onSuccess: (secureUrl) => {
+      setFormState((current) => ({ ...current, questionImageUrl: secureUrl }));
+    },
+    onError: () => {
+      window.alert('Question image upload failed. Please try again.');
+    }
+  });
+
+  const { openWidget: openExplanationImageWidget, isReady: isExplanationWidgetReady } = useCloudinaryWidget({
+    resourceType: 'image',
+    folder: 'biolab/mcq-images',
+    onSuccess: (secureUrl) => {
+      setFormState((current) => ({ ...current, explanationImageUrl: secureUrl }));
+    },
+    onError: () => {
+      window.alert('Explanation image upload failed. Please try again.');
+    }
+  });
 
   const chapters = getChapters(formState.level, formState.subject);
   const filteredQuestions = useMemo(() => {
@@ -222,7 +254,14 @@ export default function AdminMcq() {
     setSaving(true);
 
     try {
-      const input = toQuestionInput(formState);
+      const finalQuestionImageUrl = formState.questionImageUrl;
+      const finalExplanationImageUrl = formState.explanationImageUrl;
+
+      const input = {
+        ...toQuestionInput(formState),
+        questionImageUrl: finalQuestionImageUrl || null,
+        explanationImageUrl: finalExplanationImageUrl || null,
+      };
 
       if (editingId) {
         await updateQuestion(editingId, input);
@@ -264,35 +303,29 @@ export default function AdminMcq() {
     }
   };
 
-  const handleStarterImport = async () => {
-    const existingIds = new Set(questions.map((question) => question.id));
-    const missingStarters = starterMcqQuestions.filter((question) => !existingIds.has(question.id));
+  const handleBulkUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    if (missingStarters.length === 0) {
-      window.alert('Starter MCQ bank is already imported.');
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Import ${missingStarters.length} starter MCQ into Firestore? Existing starter rows will not be duplicated.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setImportingStarters(true);
-
+    setImporting(true);
     try {
+      const text = await file.text();
+      const items = JSON.parse(text);
+
+      if (!Array.isArray(items)) {
+        throw new Error('JSON file must contain an array of questions.');
+      }
+
       const chunkSize = 400;
-
-      for (let index = 0; index < missingStarters.length; index += chunkSize) {
+      for (let index = 0; index < items.length; index += chunkSize) {
         const batch = writeBatch(db);
-        const chunk = missingStarters.slice(index, index + chunkSize);
+        const chunk = items.slice(index, index + chunkSize);
 
-        chunk.forEach(({ id, ...question }, itemIndex) => {
+        chunk.forEach((item, itemIndex) => {
+          const id = item.id || crypto.randomUUID();
           batch.set(doc(db, 'mcqQuestions', id), {
-            ...question,
+            ...initialFormState,
+            ...item,
             createdAt: Date.now() + index + itemIndex,
             updatedAt: Date.now() + index + itemIndex,
           });
@@ -301,13 +334,25 @@ export default function AdminMcq() {
         await batch.commit();
       }
 
-      window.alert(`${missingStarters.length} starter MCQ imported successfully.`);
+      window.alert(`Successfully imported ${items.length} questions.`);
     } catch (error) {
-      console.error('Failed to import starter MCQ bank:', error);
-      window.alert('Starter import failed. Please check admin permissions.');
+      console.error('Bulk upload failed:', error);
+      window.alert(`Upload failed: ${error instanceof Error ? error.message : 'Invalid JSON file or permission error.'}`);
     } finally {
-      setImportingStarters(false);
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const downloadTemplate = () => {
+    const template = [initialFormState];
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mcq_template.json';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -318,14 +363,15 @@ export default function AdminMcq() {
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-orange-500">Exam Content</p>
         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl font-extrabold text-slate-950 dark:text-white">MCQ Question Bank</h1>
-          <Button
-            type="button"
-            onClick={() => void handleStarterImport()}
-            disabled={importingStarters}
-            className="rounded-xl bg-teal-600 font-bold text-white hover:bg-teal-700"
-          >
-            {importingStarters ? 'Importing...' : 'Import Starter Bank'}
-          </Button>
+          <div className="flex gap-2">
+            <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleBulkUpload} />
+            <Button type="button" variant="outline" onClick={downloadTemplate} className="rounded-xl font-bold">
+              <Download className="mr-2 h-4 w-4" /> Template
+            </Button>
+            <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={importing} className="rounded-xl bg-teal-600 font-bold text-white hover:bg-teal-700">
+              <UploadCloud className="mr-2 h-4 w-4" /> {importing ? 'Uploading...' : 'Bulk JSON Upload'}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -352,7 +398,7 @@ export default function AdminMcq() {
             </h2>
           </div>
           <p className="text-sm font-semibold text-slate-500">
-            Student attempts auto-shuffle 25 questions from each active chapter pool. A built-in 25-question starter fallback is available per chapter until the live bank is ready.
+            Student attempts auto-shuffle questions from each active chapter pool.
           </p>
         </div>
 
@@ -468,9 +514,29 @@ export default function AdminMcq() {
           )}
 
           <label className="block space-y-1.5 text-sm font-semibold">
-            <span>Question</span>
+            <span>Question Text</span>
             <textarea required value={formState.questionText} onChange={(event) => setFormState((current) => ({ ...current, questionText: event.target.value }))} className="min-h-28 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950" />
           </label>
+          <div className="grid gap-4 md:grid-cols-2">
+             <div className="space-y-1.5">
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-semibold">Question Image URL (Optional)</label>
+                 <Button type="button" variant="outline" size="sm" onClick={openQuestionImageWidget} disabled={!isQuestionWidgetReady} className="h-7 text-xs">
+                   <UploadCloud className="mr-1.5 h-3.5 w-3.5" /> Upload image
+                 </Button>
+               </div>
+               <input type="text" placeholder="/mcq-images/example.png or https://..." value={formState.questionImageUrl} onChange={(e) => setFormState((current) => ({ ...current, questionImageUrl: e.target.value }))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950" />
+             </div>
+             <div className="space-y-1.5">
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-semibold">Explanation Image URL (Optional)</label>
+                 <Button type="button" variant="outline" size="sm" onClick={openExplanationImageWidget} disabled={!isExplanationWidgetReady} className="h-7 text-xs">
+                   <UploadCloud className="mr-1.5 h-3.5 w-3.5" /> Upload image
+                 </Button>
+               </div>
+               <input type="text" placeholder="/mcq-images/example.png or https://..." value={formState.explanationImageUrl} onChange={(e) => setFormState((current) => ({ ...current, explanationImageUrl: e.target.value }))} className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950" />
+             </div>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             {(['A', 'B', 'C', 'D'] as AnswerOption[]).map((option) => (
@@ -555,6 +621,9 @@ export default function AdminMcq() {
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] ${question.status === 'active' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}>{question.status}</span>
                   </div>
                   <h2 className="mt-3 text-base font-extrabold leading-7 text-slate-950 dark:text-white">{question.questionText}</h2>
+                  {question.questionImageUrl && (
+                    <img src={question.questionImageUrl} alt="Question" className="mt-2 max-h-48 rounded-lg object-contain" />
+                  )}
                   <div className="mt-3 grid gap-2 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-2">
                     <p>A. {question.optionA}</p>
                     <p>B. {question.optionB}</p>

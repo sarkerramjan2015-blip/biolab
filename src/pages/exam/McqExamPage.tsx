@@ -300,6 +300,9 @@ export default function McqExamPage() {
               <h2 className="mt-3 text-base font-extrabold leading-7 text-slate-950 dark:text-white sm:text-lg">
                 {question.questionText}
               </h2>
+              {question.questionImageUrl && (
+                <img src={question.questionImageUrl} alt="Question" className="mt-3 max-h-64 w-full rounded-lg object-contain object-left" />
+              )}
               <div className="mt-5 grid gap-3">
                 {optionKeys.map((option) => {
                   const isSelected = selectedOption === option;

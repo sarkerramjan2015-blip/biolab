@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useChapters, ChapterDoc, useResourceControls } from '@/lib/content';
+import { useChapters, ChapterDoc, useResourceControls, trackPdfDownload } from '@/lib/content';
+import { useAuth } from '@/lib/auth';
 import {
   botanyChapters as hardcodedBotany,
   sscBiologyChapters as hardcodedSsc,
@@ -208,6 +209,7 @@ function ChapterGrid({ chapters, colorTheme }: { chapters: ChapterDoc[]; colorTh
 }
 
 function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme: ColorTheme }) {
+  const { user } = useAuth();
   const themeStyles = {
     teal: {
       card: 'hover:border-teal-300 hover:shadow-teal-500/10',
@@ -237,6 +239,18 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
     if (!writer.pdfUrl) {
       window.alert('এই chapter-এর PDF এখনো upload করা হয়নি।');
       return;
+    }
+
+    if (user) {
+      trackPdfDownload({
+        userId: user.uid,
+        userEmail: user.email,
+        userName: user.displayName,
+        pdfUrl: writer.pdfUrl,
+        pdfTitle: `${chapter.title} - ${writer.resourceTitle ?? writer.name}`,
+        subject: chapter.subject,
+        chapter: chapter.id,
+      });
     }
 
     const link = document.createElement('a');
@@ -303,9 +317,14 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                     <Link
                       to={{
                         pathname: '/reader',
-                        search: `?pdf=${encodeURIComponent(writer.pdfUrl!)}&title=${encodeURIComponent(`${chapter.title} - ${title}`)}`,
+                        search: `?pdf=${encodeURIComponent(writer.pdfUrl!)}&title=${encodeURIComponent(`${chapter.title} - ${title}`)}&subject=${encodeURIComponent(chapter.subject)}&chapter=${encodeURIComponent(chapter.id)}`,
                       }}
-                      state={{ pdfUrl: writer.pdfUrl, title: `${chapter.title} - ${title}` }}
+                      state={{
+                        pdfUrl: writer.pdfUrl,
+                        title: `${chapter.title} - ${title}`,
+                        subject: chapter.subject,
+                        chapter: chapter.id,
+                      }}
                       className="min-w-0"
                     >
                       <Button

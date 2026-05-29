@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, LockKeyhole, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { adminSetupHint, isAdminUser, isLocalAdminPreviewEnabled } from '@/lib/admin';
+import { adminSetupHint, isLocalAdminPreviewEnabled } from '@/lib/admin';
 import { useAuth } from '@/lib/auth';
 
 type ProtectedRouteProps = {
@@ -12,7 +12,7 @@ type ProtectedRouteProps = {
 };
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, loading, login, loginError } = useAuth();
+  const { user, isAdmin, loading, login, loginError } = useAuth();
   const localPreview = isLocalAdminPreviewEnabled();
   const navigate = useNavigate();
 
@@ -77,7 +77,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     );
   }
 
-  if (requireAdmin && !isAdminUser(user)) {
+  if (requireAdmin && !isAdmin) {
     return (
       <div className="grid min-h-screen place-items-center bg-slate-50 p-4 dark:bg-slate-950">
         <Card className="w-full max-w-lg border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
