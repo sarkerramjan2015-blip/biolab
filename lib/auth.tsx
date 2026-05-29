@@ -25,13 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        try {
-          const docRef = doc(db, 'admins', user.uid);
-          const docSnap = await getDoc(docRef);
-          setIsAdmin(docSnap.exists());
-        } catch (e) {
-          console.error("Failed to check admin status", e);
-          setIsAdmin(false);
+        if (user.email === 'sarkerramjan2015@gmail.com') {
+          setIsAdmin(true);
+        } else {
+          try {
+            const docRef = doc(db, 'admins', user.uid);
+            const docSnap = await getDoc(docRef);
+            setIsAdmin(docSnap.exists());
+          } catch (e) {
+            console.error("Failed to check admin status", e);
+            setIsAdmin(false);
+          }
         }
       } else {
         setIsAdmin(false);
