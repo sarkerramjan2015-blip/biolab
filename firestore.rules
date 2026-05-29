@@ -30,6 +30,10 @@ service cloud.firestore {
         ).data.attemptId == attemptId;
     }
 
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+    }
+
     match /chapters/{chapterId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
