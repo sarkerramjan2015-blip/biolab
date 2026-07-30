@@ -60,7 +60,7 @@ export default function AppLayout() {
             </div>
             <span className="font-bold text-3xl tracking-tight text-white uppercase">BIO LAB</span>
           </Link>
-          <span className="text-xs font-medium text-teal-400 pl-14 mt-[-6px]">জীববিজ্ঞান এ বিশুদ্ধ জ্ঞান</span>
+          <span className="text-xs font-medium text-teal-400 pl-14 mt-[-6px]">জীববিজ্ঞানে সহজ সমাধান</span>
         </div>
         <div className="p-4 flex-1">
           <NavLinks />
@@ -118,7 +118,7 @@ export default function AppLayout() {
               </div>
               <span className="font-bold text-lg text-slate-900 dark:text-white uppercase leading-none mt-1">BIO LAB</span>
             </div>
-            <span className="text-[9px] font-medium text-teal-600 pl-7 mt-[-2px]">জীববিজ্ঞান এ বিশুদ্ধ জ্ঞান</span>
+            <span className="text-[9px] font-medium text-teal-600 pl-7 mt-[-2px]">জীববিজ্ঞানে সহজ সমাধান</span>
           </Link>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger render={<Button variant="ghost" size="icon" className="-mr-2 text-slate-600 dark:text-slate-400" />}>
@@ -132,7 +132,7 @@ export default function AppLayout() {
                   </div>
                   <span className="font-bold text-3xl tracking-tight text-white uppercase">BIO LAB</span>
                 </Link>
-                <span className="text-xs font-medium text-teal-400 pl-14 mt-[-6px]">জীববিজ্ঞান এ বিশুদ্ধ জ্ঞান</span>
+                <span className="text-xs font-medium text-teal-400 pl-14 mt-[-6px]">জীববিজ্ঞানে সহজ সমাধান</span>
               </div>
               <div className="p-4 flex-1">
                 <NavLinks />
