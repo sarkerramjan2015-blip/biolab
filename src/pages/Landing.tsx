@@ -48,7 +48,7 @@ const studentBenefits = [
 
 export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, login, logout, loading } = useAuth();
+  const { user, isAdmin, login, logout, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -63,7 +63,6 @@ export default function Landing() {
     { name: 'Practical', path: '/practical' },
     { name: 'স্পেশাল PDF কালেকশন', path: '/resources' },
     { name: 'Mentor', path: '/mentors' },
-    { name: 'Admin Portal', path: '/admin/dashboard' },
   ];
 
   return (
@@ -84,7 +83,7 @@ export default function Landing() {
                 BIO LAB
               </span>
               <span className="mt-1 text-[10px] font-bold text-teal-700 dark:text-teal-300 sm:text-xs">
-                জীববিজ্ঞানে বিশুদ্ধ প্রস্তুতি
+                জীববিজ্ঞানে সহজ সমাধান
               </span>
             </div>
           </Link>
@@ -95,6 +94,14 @@ export default function Landing() {
                 {item.name}
               </Link>
             ))}
+            {!loading && user && isAdmin && (
+              <Link
+                to="/admin"
+                className="rounded-lg bg-orange-50 px-3 py-2 text-orange-700 transition-colors hover:bg-orange-100 hover:text-orange-800 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-950/70"
+              >
+                Admin Dashboard
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -161,6 +168,15 @@ export default function Landing() {
                     {item.name}
                   </Link>
                 ))}
+                {!loading && user && isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="rounded-xl bg-orange-50 px-3 py-3 font-bold text-orange-700 hover:bg-orange-100 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-950/70"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
               </div>
             </motion.div>
           )}
@@ -195,7 +211,7 @@ export default function Landing() {
                     </div>
                     <div className="hero-brand-slide">
                       <p className="hero-brand-subtitle text-xl font-bold text-teal-100 sm:text-3xl">
-                        জীববিজ্ঞানে বিশুদ্ধ প্রস্তুতি
+                        জীববিজ্ঞানে সহজ সমাধান
                       </p>
                     </div>
                   </div>

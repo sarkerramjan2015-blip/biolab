@@ -5,10 +5,15 @@ export type WriterContent = {
   video: boolean;
   pdfUrl?: string;
   storagePath?: string;
+  cloudinaryPublicId?: string;
+  cloudinaryResourceType?: string;
   resourceTitle?: string;
-  resourceKind?: 'pdf' | 'solve' | 'exam' | 'note';
+  resourceKind?: 'pdf' | 'book' | 'note' | 'solve' | 'exam' | 'suggestion' | 'lecture' | 'other';
   sourcePath?: string;
   sizeLabel?: string;
+  fileType?: 'pdf' | 'image' | 'video' | 'audio' | 'document' | 'archive' | 'other';
+  mimeType?: string;
+  originalFileName?: string;
 };
 
 export type Chapter = {

@@ -12,6 +12,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminExamReport from './pages/admin/AdminExamReport';
 import AdminMcq from './pages/admin/AdminMcq';
 import AdminPractical from './pages/admin/AdminPractical';
+import AdminResources from './pages/admin/AdminResources';
 import { AuthProvider } from '@/lib/auth';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import WhatsAppFab from './components/site/WhatsAppFab';
@@ -58,12 +59,13 @@ export default function App() {
           <Route element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/resources" element={<AdminResources />} />
             <Route path="/admin/mcq" element={<AdminMcq />} />
             <Route path="/admin/practical" element={<AdminPractical />} />
             <Route path="/admin/exam-report" element={<AdminExamReport />} />
-            <Route path="/admin/content" element={<Navigate to="/admin/dashboard#pdf-resources" replace />} />
-            <Route path="/admin/users" element={<Navigate to="/admin/dashboard#admin-help" replace />} />
-            <Route path="/admin/settings" element={<Navigate to="/admin/dashboard#admin-help" replace />} />
+            <Route path="/admin/content" element={<Navigate to="/admin/resources" replace />} />
+            <Route path="/admin/users" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/settings" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
         </Routes>
         <WhatsAppFab />

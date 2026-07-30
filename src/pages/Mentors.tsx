@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Award, BookOpen, FileText, GraduationCap, Layers, Library } from 'lucide-react';
+import { Award, BookOpen, GraduationCap, Layers, Library } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -65,15 +65,10 @@ export default function Mentors() {
             <p className="mt-6 max-w-2xl text-base font-medium leading-8 text-slate-600 dark:text-slate-300">
               {mentor.bio}
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7">
               <Link to="/resources" className="w-full sm:w-auto">
                 <Button className="h-11 w-full rounded-xl bg-teal-600 px-6 font-bold text-white hover:bg-teal-700">
                   স্পেশাল PDF কালেকশন দেখো
-                </Button>
-              </Link>
-              <Link to="/reader" className="w-full sm:w-auto">
-                <Button variant="outline" className="h-11 w-full rounded-xl border-slate-300 px-6 font-bold dark:border-slate-700">
-                  PDF Reader
                 </Button>
               </Link>
             </div>

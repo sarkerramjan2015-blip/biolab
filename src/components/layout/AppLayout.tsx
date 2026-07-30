@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FileText, FlaskConical, GraduationCap, Home, Library, LogOut, Menu, Microscope, PlaySquare, Users } from 'lucide-react';
+import { FlaskConical, GraduationCap, Home, Library, LogOut, Menu, Microscope, PlaySquare, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
@@ -20,7 +20,6 @@ export default function AppLayout() {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <Home className="w-5 h-5" /> },
     { name: 'স্পেশাল PDF কালেকশন', path: '/resources', icon: <Library className="w-5 h-5" /> },
-    { name: 'PDF Reader', path: '/reader', icon: <FileText className="w-5 h-5" /> },
     { name: 'Exam', path: '/exam', icon: <GraduationCap className="w-5 h-5" /> },
     { name: 'Practical', path: '/practical', icon: <FlaskConical className="w-5 h-5" /> },
     { name: 'Mentor', path: '/mentors', icon: <Users className="w-5 h-5" /> },

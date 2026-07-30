@@ -227,6 +227,10 @@ export async function startExamAttempt(config: ExamConfig, user: User) {
     throw new Error('No active questions are available for this exam yet.');
   }
 
+  if (availableQuestions.length < TOTAL_QUESTIONS) {
+    throw new NotEnoughQuestionsError(availableQuestions.length);
+  }
+
   const selectedQuestions = shuffle(availableQuestions).slice(0, TOTAL_QUESTIONS);
   const dayKey = getDhakaDayKey();
   const lockId = config.testType === 'chapter_wise'
@@ -439,7 +443,7 @@ export function useAttemptAnswers(attemptId: string | null) {
   return { answers, loading };
 }
 
-export function useExamAttempts() {
+export function useExamAttempts(includeRunning = false) {
   const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -450,7 +454,7 @@ export function useExamAttempts() {
         setAttempts(
           snapshot.docs
             .map((item) => ({ id: item.id, ...(item.data() as Omit<ExamAttempt, 'id'>) }))
-            .filter((attempt) => attempt.status === 'submitted')
+            .filter((attempt) => includeRunning || attempt.status === 'submitted')
             .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0)),
         );
         setLoading(false);
@@ -463,7 +467,7 @@ export function useExamAttempts() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [includeRunning]);
 
   return { attempts, loading };
 }

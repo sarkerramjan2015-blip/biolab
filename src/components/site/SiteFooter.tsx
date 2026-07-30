@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
-import { Code2, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Code2, LockKeyhole, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -69,6 +70,14 @@ export default function SiteFooter() {
               <Phone className="h-4 w-4 shrink-0 text-emerald-300" />
               <span>WhatsApp: +8801849625831</span>
             </a>
+            <Link
+              to="/admin"
+              aria-label="Staff access"
+              title="Staff access"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-800 bg-slate-900/70 text-slate-600 transition-all hover:border-indigo-500/60 hover:text-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            >
+              <LockKeyhole className="h-3.5 w-3.5" />
+            </Link>
           </address>
         </section>
 

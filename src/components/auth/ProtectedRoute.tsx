@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Loader2, LockKeyhole, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,16 +12,16 @@ type ProtectedRouteProps = {
 };
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, isAdmin, loading, login, loginError } = useAuth();
+  const { user, isAdmin, loading, loginAsAdmin, loginError, logout } = useAuth();
   const localPreview = isLocalAdminPreviewEnabled();
-  const navigate = useNavigate();
 
   const handleAdminLogin = async () => {
-    const signedIn = await login();
+    await loginAsAdmin();
+  };
 
-    if (!signedIn) {
-      navigate('/');
-    }
+  const handleSwitchAdmin = async () => {
+    await logout();
+    await loginAsAdmin();
   };
 
   if (loading) {
@@ -48,18 +48,18 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
               <LockKeyhole className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Admin login required</h1>
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Admin Login</h1>
               <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                 {localPreview
                   ? 'Local test mode is on. Sign in with Google to preview the admin dashboard.'
-                  : 'The student website is public. Sign in only if you need to manage BIO LAB admin content.'}
+                  : 'BIO LAB পরিচালনার জন্য অনুমোদিত Admin Gmail দিয়ে প্রবেশ করুন।'}
               </p>
             </div>
             <Button
               onClick={() => void handleAdminLogin()}
               className="h-11 w-full rounded-xl bg-teal-600 font-bold text-white hover:bg-teal-700"
             >
-              Continue with Google
+              Admin Gmail দিয়ে চালিয়ে যান
             </Button>
             <Link to="/">
               <Button variant="outline" className="h-11 w-full rounded-xl font-bold">
@@ -86,11 +86,17 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
               <ShieldAlert className="h-7 w-7" />
             </div>
             <div>
-              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Admin access only</h1>
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">অনুমোদিত Admin প্রয়োজন</h1>
               <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                This account is logged in, but it is not listed as an admin. {adminSetupHint}
+                বর্তমান Google account-টি BIO LAB Admin হিসেবে অনুমোদিত নয়। {adminSetupHint}
               </p>
             </div>
+            <Button
+              onClick={() => void handleSwitchAdmin()}
+              className="h-11 w-full rounded-xl bg-teal-600 font-bold text-white hover:bg-teal-700"
+            >
+              অন্য Admin Gmail ব্যবহার করুন
+            </Button>
             <Link to="/">
               <Button variant="outline" className="h-11 w-full rounded-xl font-bold">
                 Back to BIO LAB

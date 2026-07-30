@@ -16,7 +16,7 @@ export function isLocalAdminPreviewEnabled() {
     return false;
   }
 
-  const previewAllowed = import.meta.env.VITE_ALLOW_LOCAL_ADMIN_PREVIEW !== 'false';
+  const previewAllowed = import.meta.env.VITE_ALLOW_LOCAL_ADMIN_PREVIEW === 'true';
 
   return previewAllowed && isPrivateDevelopmentHost(window.location.hostname);
 }
@@ -24,4 +24,4 @@ export function isLocalAdminPreviewEnabled() {
 
 
 export const adminSetupHint =
-  'Local/private dev preview opens the admin dashboard. Production write access needs this email in VITE_ADMIN_EMAILS and Firebase rules, or a Firebase admin custom claim.';
+  'Production access approved email, Firebase admin claim অথবা provisioned admin account দিয়ে নিয়ন্ত্রিত।';

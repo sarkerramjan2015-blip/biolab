@@ -14,10 +14,16 @@ import type { ContentStatus, ExamLevel } from '@/src/data/exam';
 
 export type Practical = {
   id: string;
+  catalogId?: string;
+  isCustom?: boolean;
+  hidden?: boolean;
   title: string;
   level: ExamLevel;
   subject: string;
+  sortOrder?: number;
   description: string;
+  noteTitle?: string;
+  noteUrl?: string;
   sheetUrl?: string;
   videoTitle?: string;
   videoUrl?: string;
@@ -28,6 +34,16 @@ export type Practical = {
 };
 
 export type PracticalInput = Omit<Practical, 'id' | 'createdAt' | 'updatedAt'>;
+
+export function getPracticalNoteUrl(practical: Pick<Practical, 'noteUrl' | 'sheetUrl'>) {
+  return practical.noteUrl ?? practical.sheetUrl;
+}
+
+function withoutUndefined<T extends object>(value: T) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
+  );
+}
 
 export function usePracticals(includeInactive = false) {
   const [practicals, setPracticals] = useState<Practical[]>([]);
@@ -57,7 +73,7 @@ export function usePracticals(includeInactive = false) {
   const addPractical = async (practical: PracticalInput) => {
     const now = Date.now();
     await addDoc(collection(db, 'practicals'), {
-      ...practical,
+      ...withoutUndefined(practical),
       createdAt: now,
       updatedAt: now,
     });
@@ -65,7 +81,7 @@ export function usePracticals(includeInactive = false) {
 
   const updatePractical = async (practicalId: string, practical: Partial<PracticalInput>) => {
     await updateDoc(doc(db, 'practicals', practicalId), {
-      ...practical,
+      ...withoutUndefined(practical),
       updatedAt: Date.now(),
     });
   };

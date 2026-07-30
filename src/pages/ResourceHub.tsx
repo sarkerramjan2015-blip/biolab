@@ -1,4 +1,3 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 import { useChapters, ChapterDoc, useResourceControls, trackPdfDownload } from '@/lib/content';
 import { useAuth } from '@/lib/auth';
 import {
@@ -25,6 +25,8 @@ import { localAssetChapters } from '../data/localResources';
 import Seo from '@/src/components/Seo';
 
 type SubjectKey = 'botany' | 'zoology' | 'ssc';
+type LevelKey = 'hsc' | 'ssc';
+type HscSubjectKey = Exclude<SubjectKey, 'ssc'>;
 type ColorTheme = 'teal' | 'indigo' | 'amber';
 
 const subjectLabels: Record<SubjectKey, string> = {
@@ -81,6 +83,8 @@ function filterHiddenResources(chapters: ChapterDoc[], hiddenUrls: Set<string>) 
 export default function ResourceHub() {
   const { chapters } = useChapters();
   const { hiddenUrls } = useResourceControls();
+  const [selectedLevel, setSelectedLevel] = useState<LevelKey | null>(null);
+  const [selectedHscSubject, setSelectedHscSubject] = useState<HscSubjectKey | null>(null);
 
   const botanyChapters = filterHiddenResources(mergeChapters([
     ...toChapterDocs(localAssetChapters.botany, 'botany'),
@@ -98,10 +102,22 @@ export default function ResourceHub() {
     ...chapters.filter((chapter) => chapter.subject === 'ssc'),
   ]), hiddenUrls);
 
-  const pdfCount = [...botanyChapters, ...zoologyChapters, ...sscBiologyChapters].reduce(
+  const countPdfs = (items: ChapterDoc[]) => items.reduce(
     (sum, chapter) => sum + chapter.writers.filter((writer) => writer.pdfUrl).length,
     0,
   );
+  const botanyPdfCount = countPdfs(botanyChapters);
+  const zoologyPdfCount = countPdfs(zoologyChapters);
+  const sscPdfCount = countPdfs(sscBiologyChapters);
+  const hscPdfCount = botanyPdfCount + zoologyPdfCount;
+  const pdfCount = hscPdfCount + sscPdfCount;
+
+  const selectLevel = (level: LevelKey) => {
+    setSelectedLevel(level);
+    if (level === 'hsc') {
+      setSelectedHscSubject(null);
+    }
+  };
 
   return (
     <motion.div
@@ -138,8 +154,8 @@ export default function ResourceHub() {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: 'PDF', value: pdfCount },
-                { label: 'HSC', value: botanyChapters.length + zoologyChapters.length },
-                { label: 'SSC', value: sscBiologyChapters.length },
+                { label: 'HSC Chapters', value: botanyChapters.length + zoologyChapters.length },
+                { label: 'SSC Chapters', value: sscBiologyChapters.length },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -156,38 +172,288 @@ export default function ResourceHub() {
         </div>
       </header>
 
-      <Tabs defaultValue="botany" className="w-full">
-          <TabsList className="sticky top-16 z-20 mb-5 flex h-auto w-full justify-start gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-lg shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-none md:top-0 md:justify-center">
-            <TabsTrigger value="botany" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-teal-500/20 sm:px-7 sm:text-base">
-              <span className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" /> উদ্ভিদবিজ্ঞান
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="zoology" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 sm:px-7 sm:text-base">
-              <span className="flex items-center gap-2">
-                <Microscope className="h-5 w-5" /> প্রাণিবিজ্ঞান
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="ssc" className="min-w-max rounded-xl px-4 py-2.5 text-sm font-bold transition-all data-[state=active]:bg-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/20 sm:px-7 sm:text-base">
-              <span className="flex items-center gap-2">
-                <Book className="h-5 w-5" /> SSC Biology
-              </span>
-            </TabsTrigger>
-          </TabsList>
+      <section aria-labelledby="collection-level-heading" className="space-y-6">
+        <div className="text-center">
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-teal-600 dark:text-teal-300">
+            Choose your level
+          </p>
+          <h2 id="collection-level-heading" className="mt-2 text-2xl font-extrabold text-slate-950 dark:text-white sm:text-3xl">
+            কোন Biology collection দেখতে চাও?
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500 dark:text-slate-400 sm:text-base">
+            Level বেছে নাও—তারপর chapter অনুযায়ী সাজানো PDF, note এবং solve resource দেখো।
+          </p>
+        </div>
 
-          <TabsContent value="botany" className="focus:outline-none">
-            <ChapterGrid chapters={botanyChapters} colorTheme="teal" />
-          </TabsContent>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <motion.button
+            type="button"
+            aria-pressed={selectedLevel === 'hsc'}
+            onClick={() => selectLevel('hsc')}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.985 }}
+            className={`group relative min-h-44 overflow-hidden rounded-[1.75rem] border p-5 text-left shadow-xl transition-colors duration-300 sm:p-6 ${
+              selectedLevel === 'hsc'
+                ? 'border-teal-400 bg-gradient-to-br from-teal-600 via-cyan-600 to-indigo-700 text-white shadow-teal-500/25 ring-4 ring-teal-500/10'
+                : 'border-teal-100 bg-white text-slate-950 shadow-slate-200/60 hover:border-teal-300 dark:border-teal-950 dark:bg-slate-900 dark:text-white dark:shadow-black/20 dark:hover:border-teal-700'
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute -right-12 -top-12 h-40 w-40 rounded-full blur-2xl transition-opacity ${
+                selectedLevel === 'hsc' ? 'bg-white/20' : 'bg-teal-200/60 dark:bg-teal-900/30'
+              }`}
+            />
+            <span
+              aria-hidden="true"
+              className={`absolute -bottom-16 left-12 h-32 w-56 rounded-full blur-3xl ${
+                selectedLevel === 'hsc' ? 'bg-indigo-400/35' : 'bg-cyan-100/70 dark:bg-cyan-950/30'
+              }`}
+            />
+            <span className="relative flex h-full flex-col">
+              <span className="flex items-start justify-between gap-4">
+                <span
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm ${
+                    selectedLevel === 'hsc'
+                      ? 'border-white/25 bg-white/15'
+                      : 'border-teal-100 bg-teal-50 text-teal-700 dark:border-teal-900 dark:bg-teal-950/50 dark:text-teal-300'
+                  }`}
+                >
+                  <GraduationCap className="h-6 w-6" />
+                </span>
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition-transform duration-300 group-hover:translate-x-1 ${
+                    selectedLevel === 'hsc'
+                      ? 'border-white/25 bg-white/15'
+                      : 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </span>
+              </span>
+              <span className={`mt-5 text-[11px] font-extrabold uppercase tracking-[0.2em] ${
+                selectedLevel === 'hsc' ? 'text-cyan-100' : 'text-teal-600 dark:text-teal-300'
+              }`}>
+                Higher Secondary
+              </span>
+              <span className="mt-1 text-2xl font-extrabold tracking-tight sm:text-[1.7rem]">HSC Biology</span>
+              <span className={`mt-1.5 text-sm font-semibold ${
+                selectedLevel === 'hsc' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
+              }`}>
+                উদ্ভিদবিজ্ঞান ও প্রাণিবিজ্ঞান
+              </span>
+              <span className={`mt-auto pt-4 text-[11px] font-bold uppercase tracking-[0.15em] ${
+                selectedLevel === 'hsc' ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
+              }`}>
+                {botanyChapters.length + zoologyChapters.length} Chapters · {hscPdfCount} PDFs
+              </span>
+            </span>
+          </motion.button>
 
-          <TabsContent value="zoology" className="focus:outline-none">
-            <ChapterGrid chapters={zoologyChapters} colorTheme="indigo" />
-          </TabsContent>
+          <motion.button
+            type="button"
+            aria-pressed={selectedLevel === 'ssc'}
+            onClick={() => selectLevel('ssc')}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.985 }}
+            className={`group relative min-h-44 overflow-hidden rounded-[1.75rem] border p-5 text-left shadow-xl transition-colors duration-300 sm:p-6 ${
+              selectedLevel === 'ssc'
+                ? 'border-amber-400 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 text-white shadow-orange-500/25 ring-4 ring-amber-500/10'
+                : 'border-amber-100 bg-white text-slate-950 shadow-slate-200/60 hover:border-amber-300 dark:border-amber-950 dark:bg-slate-900 dark:text-white dark:shadow-black/20 dark:hover:border-amber-700'
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute -right-12 -top-12 h-40 w-40 rounded-full blur-2xl ${
+                selectedLevel === 'ssc' ? 'bg-white/20' : 'bg-amber-200/60 dark:bg-amber-900/30'
+              }`}
+            />
+            <span
+              aria-hidden="true"
+              className={`absolute -bottom-16 left-12 h-32 w-56 rounded-full blur-3xl ${
+                selectedLevel === 'ssc' ? 'bg-rose-400/35' : 'bg-orange-100/70 dark:bg-orange-950/30'
+              }`}
+            />
+            <span className="relative flex h-full flex-col">
+              <span className="flex items-start justify-between gap-4">
+                <span
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl border shadow-sm ${
+                    selectedLevel === 'ssc'
+                      ? 'border-white/25 bg-white/15'
+                      : 'border-amber-100 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300'
+                  }`}
+                >
+                  <Book className="h-6 w-6" />
+                </span>
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition-transform duration-300 group-hover:translate-x-1 ${
+                    selectedLevel === 'ssc'
+                      ? 'border-white/25 bg-white/15'
+                      : 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </span>
+              </span>
+              <span className={`mt-5 text-[11px] font-extrabold uppercase tracking-[0.2em] ${
+                selectedLevel === 'ssc' ? 'text-amber-100' : 'text-amber-600 dark:text-amber-300'
+              }`}>
+                Secondary
+              </span>
+              <span className="mt-1 text-2xl font-extrabold tracking-tight sm:text-[1.7rem]">SSC Biology</span>
+              <span className={`mt-1.5 text-sm font-semibold ${
+                selectedLevel === 'ssc' ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
+              }`}>
+                এক বিষয়ের সম্পূর্ণ chapter collection
+              </span>
+              <span className={`mt-auto pt-4 text-[11px] font-bold uppercase tracking-[0.15em] ${
+                selectedLevel === 'ssc' ? 'text-white/75' : 'text-slate-400 dark:text-slate-500'
+              }`}>
+                {sscBiologyChapters.length} Chapters · {sscPdfCount} PDFs
+              </span>
+            </span>
+          </motion.button>
+        </div>
 
-          <TabsContent value="ssc" className="focus:outline-none">
+        {selectedLevel === 'hsc' && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-5 rounded-[2rem] border border-slate-200/80 bg-slate-50/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/60 sm:p-6"
+          >
+            <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-300">
+                  HSC Biology
+                </p>
+                <h3 className="mt-1 text-xl font-extrabold text-slate-950 dark:text-white sm:text-2xl">
+                  এবার বিষয় নির্বাচন করো
+                </h3>
+              </div>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                ১ম পত্র অথবা ২য় পত্র
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SubjectButton
+                active={selectedHscSubject === 'botany'}
+                icon={<GraduationCap className="h-6 w-6" />}
+                title="উদ্ভিদবিজ্ঞান"
+                subtitle="HSC Biology 1st Paper"
+                meta={`${botanyChapters.length} Chapters · ${botanyPdfCount} PDFs`}
+                colorTheme="teal"
+                onClick={() => setSelectedHscSubject('botany')}
+              />
+              <SubjectButton
+                active={selectedHscSubject === 'zoology'}
+                icon={<Microscope className="h-6 w-6" />}
+                title="প্রাণিবিজ্ঞান"
+                subtitle="HSC Biology 2nd Paper"
+                meta={`${zoologyChapters.length} Chapters · ${zoologyPdfCount} PDFs`}
+                colorTheme="indigo"
+                onClick={() => setSelectedHscSubject('zoology')}
+              />
+            </div>
+
+            {selectedHscSubject === 'botany' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
+                <ChapterGrid chapters={botanyChapters} colorTheme="teal" />
+              </motion.div>
+            )}
+
+            {selectedHscSubject === 'zoology' && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
+                <ChapterGrid chapters={zoologyChapters} colorTheme="indigo" />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {selectedLevel === 'ssc' && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-5 rounded-[2rem] border border-amber-200/80 bg-amber-50/40 p-4 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/10 sm:p-6"
+          >
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">
+                SSC Biology
+              </p>
+              <h3 className="mt-1 text-xl font-extrabold text-slate-950 dark:text-white sm:text-2xl">
+                Chapter অনুযায়ী resource
+              </h3>
+            </div>
             <ChapterGrid chapters={sscBiologyChapters} colorTheme="amber" />
-          </TabsContent>
-      </Tabs>
+          </motion.div>
+        )}
+      </section>
     </motion.div>
+  );
+}
+
+function SubjectButton({
+  active,
+  icon,
+  title,
+  subtitle,
+  meta,
+  colorTheme,
+  onClick,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  meta: string;
+  colorTheme: Exclude<ColorTheme, 'amber'>;
+  onClick: () => void;
+}) {
+  const activeStyles = colorTheme === 'teal'
+    ? 'border-teal-400 bg-teal-600 text-white shadow-teal-500/20 ring-teal-500/10'
+    : 'border-indigo-400 bg-indigo-600 text-white shadow-indigo-500/20 ring-indigo-500/10';
+  const idleStyles = colorTheme === 'teal'
+    ? 'border-teal-100 bg-white text-slate-950 hover:border-teal-300 dark:border-teal-950 dark:bg-slate-950 dark:text-white dark:hover:border-teal-700'
+    : 'border-indigo-100 bg-white text-slate-950 hover:border-indigo-300 dark:border-indigo-950 dark:bg-slate-950 dark:text-white dark:hover:border-indigo-700';
+  const iconStyles = colorTheme === 'teal'
+    ? 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300'
+    : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300';
+
+  return (
+    <motion.button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      className={`group flex min-h-24 items-center gap-3.5 rounded-2xl border p-3.5 text-left shadow-lg transition-colors duration-300 ${
+        active ? `${activeStyles} ring-4` : `${idleStyles} shadow-slate-200/40 dark:shadow-black/20`
+      }`}
+    >
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+        active ? 'bg-white/15 text-white' : iconStyles
+      }`}>
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-extrabold sm:text-lg">{title}</span>
+        <span className={`mt-0.5 block text-xs font-semibold ${
+          active ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'
+        }`}>
+          {subtitle}
+        </span>
+        <span className={`mt-2 block text-[10px] font-extrabold uppercase tracking-[0.14em] ${
+          active ? 'text-white/70' : 'text-slate-400 dark:text-slate-500'
+        }`}>
+          {meta}
+        </span>
+      </span>
+      <ChevronRight className={`h-5 w-5 shrink-0 transition-transform duration-300 group-hover:translate-x-1 ${
+        active ? 'text-white' : 'text-slate-400'
+      }`} />
+    </motion.button>
   );
 }
 
@@ -231,7 +497,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
     },
   }[colorTheme];
 
-  const availablePdfs = chapter.writers.filter((writer) => writer.pdfUrl).length;
+  const availableResources = chapter.writers.filter((writer) => writer.pdfUrl).length;
   const visibleWriters = chapter.writers.filter((writer) => writer.pdfUrl || writer.solve || writer.video);
   const pendingWriterCount = chapter.writers.length - visibleWriters.length;
 
@@ -280,8 +546,8 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
             </p>
           </div>
           <div className={`shrink-0 rounded-lg border px-2 py-1.5 text-center text-[10px] font-bold ${themeStyles.badge}`}>
-            <span className="block text-sm leading-none">{availablePdfs}</span>
-            PDF
+            <span className="block text-sm leading-none">{availableResources}</span>
+            Files
           </div>
         </div>
 
@@ -289,6 +555,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
           {visibleWriters.map((writer, index) => {
             const title = writer.resourceTitle ?? writer.name;
             const hasPdf = Boolean(writer.pdfUrl);
+            const isPdf = !writer.fileType || writer.fileType === 'pdf';
 
             return (
               <div
@@ -313,7 +580,7 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                 </div>
 
                 <div className="grid grid-cols-2 gap-1.5">
-                  {hasPdf ? (
+                  {hasPdf && isPdf ? (
                     <Link
                       to={{
                         pathname: '/reader',
@@ -335,6 +602,16 @@ function ChapterCard({ chapter, colorTheme }: { chapter: ChapterDoc; colorTheme:
                         <FileText className="mr-1.5 h-3.5 w-3.5" /> পড়ো
                       </Button>
                     </Link>
+                  ) : hasPdf ? (
+                    <a href={writer.pdfUrl} target="_blank" rel="noreferrer" className="min-w-0">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="h-7 w-full rounded-lg border border-slate-200 bg-white text-[11px] font-bold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        <FileText className="mr-1.5 h-3.5 w-3.5" /> Open
+                      </Button>
+                    </a>
                   ) : (
                     <Button
                       variant="ghost"

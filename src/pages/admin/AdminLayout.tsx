@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, CircleHelp, ClipboardList, FileText, FlaskConical, LayoutDashboard, LogOut, Menu, ShieldCheck, UploadCloud } from 'lucide-react';
+import { BarChart3, ClipboardList, FileText, FlaskConical, LayoutDashboard, LogOut, Menu, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { user, login, logout } = useAuth();
+  const { user, loginAsAdmin, logout } = useAuth();
   const localPreview = isLocalAdminPreviewEnabled();
 
   const handleLogout = async () => {
@@ -20,13 +20,11 @@ export default function AdminLayout() {
   };
 
   const navItems = [
-    { name: 'Overview', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { name: 'PDF List', path: '/admin/dashboard#pdf-resources', icon: <FileText className="w-5 h-5" /> },
-    { name: 'Upload PDF', path: '/admin/dashboard#upload-pdf', icon: <UploadCloud className="w-5 h-5" /> },
-    { name: 'MCQ Bank', path: '/admin/mcq', icon: <ClipboardList className="w-5 h-5" /> },
-    { name: 'Practical', path: '/admin/practical', icon: <FlaskConical className="w-5 h-5" /> },
-    { name: 'Exam Report', path: '/admin/exam-report', icon: <BarChart3 className="w-5 h-5" /> },
-    { name: 'Help', path: '/admin/dashboard#admin-help', icon: <CircleHelp className="w-5 h-5" /> },
+    { name: 'হোম ও সব কাজ', path: '/admin/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: 'PDF ও Resources', path: '/admin/resources', icon: <FileText className="w-5 h-5" /> },
+    { name: 'MCQ Question Bank', path: '/admin/mcq', icon: <ClipboardList className="w-5 h-5" /> },
+    { name: 'প্র্যাকটিক্যাল ক্লাস', path: '/admin/practical', icon: <FlaskConical className="w-5 h-5" /> },
+    { name: 'শিক্ষার্থীর ফলাফল', path: '/admin/exam-report', icon: <BarChart3 className="w-5 h-5" /> },
   ];
 
   const NavLinks = () => (
@@ -41,12 +39,7 @@ export default function AdminLayout() {
           <Link
             key={item.path}
             to={item.path}
-            onClick={() => {
-              setIsOpen(false);
-              if (item.path.endsWith('#upload-pdf')) {
-                window.setTimeout(() => window.dispatchEvent(new Event('bio-admin-open-upload')), 0);
-              }
-            }}
+            onClick={() => setIsOpen(false)}
             className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors ${
               isActive
                 ? 'bg-orange-500/10 font-bold text-orange-500'
@@ -70,9 +63,9 @@ export default function AdminLayout() {
             <div className="bg-orange-500 p-2 rounded-xl text-white shadow-lg shadow-orange-500/20">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <span className="font-bold text-2xl tracking-tight text-white">Admin Panel</span>
+            <span className="font-bold text-2xl tracking-tight text-white">BIO LAB Admin</span>
           </Link>
-          <span className="text-xs font-medium text-orange-400 pl-14 mt-[-6px]">Control Center</span>
+          <span className="text-xs font-medium text-orange-400 pl-14 mt-[-6px]">সহজ কন্ট্রোল সেন্টার</span>
         </div>
         <div className="p-4 flex-1">
           <NavLinks />
@@ -109,15 +102,15 @@ export default function AdminLayout() {
           )}
           <Link to="/dashboard">
             <Button variant="ghost" className="w-full justify-start text-slate-400 hover:bg-slate-800/50 hover:text-white mb-2">
-              Back to Student App
+              শিক্ষার্থীর ওয়েবসাইট দেখুন
             </Button>
           </Link>
           {user ? (
             <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-red-400 hover:bg-red-500/10 hover:text-red-300">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
+              <LogOut className="w-4 h-4 mr-2" /> লগআউট
             </Button>
           ) : (
-            <Button onClick={async () => { if (await login()) navigate('/admin/dashboard'); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
+            <Button onClick={async () => { if (await loginAsAdmin()) navigate('/admin/dashboard'); }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
               <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
             </Button>
           )}
@@ -131,7 +124,7 @@ export default function AdminLayout() {
             <div className="bg-orange-500 p-1.5 rounded-lg text-white shadow-sm">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xl text-white">Admin Panel</span>
+            <span className="font-bold text-xl text-white">BIO LAB Admin</span>
           </Link>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger render={<Button variant="ghost" size="icon" className="-mr-2 text-white hover:bg-slate-800" />}>
@@ -161,7 +154,7 @@ export default function AdminLayout() {
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                   </Button>
                 ) : (
-                  <Button onClick={async () => { if (await login()) { navigate('/admin/dashboard'); setIsOpen(false); } }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
+                  <Button onClick={async () => { if (await loginAsAdmin()) { navigate('/admin/dashboard'); setIsOpen(false); } }} variant="ghost" className="w-full justify-start text-orange-400 hover:bg-orange-500/10 hover:text-orange-300">
                     <LogOut className="w-4 h-4 mr-2 rotate-180" /> Google Login
                   </Button>
                 )}
