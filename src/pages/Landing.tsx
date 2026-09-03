@@ -62,6 +62,7 @@ export default function Landing() {
     { name: 'Home', path: '/' },
     { name: 'Exam', path: '/exam' },
     { name: 'Practical', path: '/practical' },
+    { name: 'রেজিস্ট্রেশন', path: '/registration' },
     { name: 'স্পেশাল PDF কালেকশন', path: '/resources' },
     { name: 'Mentor', path: '/mentors' },
   ];
@@ -224,14 +225,14 @@ export default function Landing() {
               </p>
 
               <div className="mt-8 flex w-full flex-col justify-center gap-3 sm:flex-row">
-                <Link to="/resources" className="w-full sm:w-auto">
+                <Link to="/registration" className="w-full sm:w-auto">
                   <Button size="lg" className="h-12 w-full rounded-xl bg-teal-600 px-7 text-base font-extrabold text-white shadow-xl shadow-teal-600/20 hover:bg-teal-700 sm:h-14">
-                    রিসোর্স দেখো <ArrowRight className="ml-2 h-4 w-4" />
+                    রেজিস্ট্রেশন করুন <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/dashboard" className="w-full sm:w-auto">
+                <Link to="/resources" className="w-full sm:w-auto">
                   <Button size="lg" variant="outline" className="h-12 w-full rounded-xl border-white/30 bg-white/10 px-7 text-base font-extrabold text-white backdrop-blur hover:bg-white/20 sm:h-14">
-                    পড়া শুরু করো
+                    রিসোর্স দেখো
                   </Button>
                 </Link>
               </div>

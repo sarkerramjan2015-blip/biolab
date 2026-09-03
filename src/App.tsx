@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
+import RegistrationPage from './pages/RegistrationPage';
 import Dashboard from './pages/Dashboard';
 import ResourceHub from './pages/ResourceHub';
 import VideoPlayerPage from './pages/VideoPlayerPage';
@@ -32,6 +33,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/registration" element={<RegistrationPage />} />
           
           {/* Public Student Routes */}
           <Route element={<AppLayout />}>
