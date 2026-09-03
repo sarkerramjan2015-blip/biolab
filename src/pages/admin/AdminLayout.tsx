@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, ClipboardList, FileText, FlaskConical, LayoutDashboard, LogOut, Menu, ShieldCheck } from 'lucide-react';
+import { BarChart3, ClipboardList, FileText, FlaskConical, LayoutDashboard, LogOut, Menu, ShieldCheck, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
@@ -24,6 +24,7 @@ export default function AdminLayout() {
     { name: 'PDF ও Resources', path: '/admin/resources', icon: <FileText className="w-5 h-5" /> },
     { name: 'MCQ Question Bank', path: '/admin/mcq', icon: <ClipboardList className="w-5 h-5" /> },
     { name: 'প্র্যাকটিক্যাল ক্লাস', path: '/admin/practical', icon: <FlaskConical className="w-5 h-5" /> },
+    { name: 'রেজিস্ট্রেশন', path: '/admin/registrations', icon: <Users className="w-5 h-5" /> },
     { name: 'শিক্ষার্থীর ফলাফল', path: '/admin/exam-report', icon: <BarChart3 className="w-5 h-5" /> },
   ];
 

@@ -22,6 +22,7 @@ import { useAuth } from '@/lib/auth';
 import Seo from '@/src/components/Seo';
 import mentorPhoto from '../img/pic.jpeg';
 import SiteFooter from '@/src/components/site/SiteFooter';
+import StudentRegistrationForm from '@/src/components/site/StudentRegistrationForm';
 
 const studentBenefits = [
   {
@@ -335,6 +336,7 @@ export default function Landing() {
             </div>
           </div>
         </section>
+        <StudentRegistrationForm />
       </main>
       <SiteFooter />
     </div>

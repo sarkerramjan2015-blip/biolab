@@ -12,6 +12,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminExamReport from './pages/admin/AdminExamReport';
 import AdminMcq from './pages/admin/AdminMcq';
 import AdminPractical from './pages/admin/AdminPractical';
+import AdminRegistrations from './pages/admin/AdminRegistrations';
 import AdminResources from './pages/admin/AdminResources';
 import { AuthProvider } from '@/lib/auth';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="/admin/mcq" element={<AdminMcq />} />
             <Route path="/admin/practical" element={<AdminPractical />} />
             <Route path="/admin/exam-report" element={<AdminExamReport />} />
+            <Route path="/admin/registrations" element={<AdminRegistrations />} />
             <Route path="/admin/content" element={<Navigate to="/admin/resources" replace />} />
             <Route path="/admin/users" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/settings" element={<Navigate to="/admin/dashboard" replace />} />
